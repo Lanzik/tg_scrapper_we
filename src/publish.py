@@ -42,10 +42,12 @@ def main() -> None:
             log_file = ROOT_DIR / log_file
 
     setup_logging(log_file, level=settings["log_level"])
+    publish_proxy = settings["telegram_proxy"] if settings.get("publish_use_proxy", False) else None
     client = build_wemessenger(settings)
 
     logger.info(
-        "PUBLISH ONLY (no proxy) | delay=%ss | interval=%ss | db=%s | log=%s",
+        "PUBLISH ONLY | proxy=%s | delay=%ss | interval=%ss | db=%s | log=%s",
+        publish_proxy or "direct",
         settings["send_delay_seconds"],
         settings["publish_interval"],
         settings["database"],
@@ -54,9 +56,12 @@ def main() -> None:
     logger.info("Queue now: %s", _queue_summary(settings["database"]))
 
     if not settings["poll"]:
-        if not wemessenger_reachable(settings["wemessenger"]["api_base"]):
+        if not wemessenger_reachable(
+            settings["wemessenger"]["api_base"],
+            proxy=publish_proxy,
+        ):
             raise SystemExit(
-                "WeMessenger unreachable. Turn VPN OFF and try again."
+                "WeMessenger unreachable. Check the proxy or direct connectivity and try again."
             )
         sent, total = publish_pending_to_wemessenger(
             settings["database"],
@@ -73,11 +78,11 @@ def main() -> None:
             summary = _queue_summary(settings["database"])
             api_base = settings["wemessenger"]["api_base"]
 
-            if not wemessenger_reachable(api_base):
+            if not wemessenger_reachable(api_base, proxy=publish_proxy):
                 logger.warning(
-                    "[%s] WeMessenger unreachable — keep queue [%s] "
-                    "(VPN must be OFF)",
+                    "[%s] WeMessenger unreachable via %s — queue remains [%s]",
                     started,
+                    publish_proxy or "direct",
                     summary,
                 )
             else:

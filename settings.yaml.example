@@ -15,10 +15,13 @@ log_file: logs/scrape.log
 publish_log_file: logs/publish.log
 log_level: INFO
 
-# Used by main.py (Telegram scrape)
+# Independent proxy toggles for each outbound path
+scraper_use_proxy: true
+publish_use_proxy: false
+
+# Proxy URL used by either scraper or publish when its respective flag is enabled
 telegram_proxy: "socks5://127.0.0.1:10808"
 
-# Used by publish.py (WeMessenger — run with VPN OFF, no proxy)
 wemessenger:
   enabled: true
   bot_token: "PASTE_BOT_TOKEN"

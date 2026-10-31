@@ -28,6 +28,7 @@ logger = logging.getLogger(__name__)
 
 def _scrape_once(settings: dict, *, only_new: bool, first: bool) -> list[int]:
     saved: list[int] = []
+    proxy = settings["telegram_proxy"] if settings.get("scraper_use_proxy", True) else None
     for channel in settings["channels"]:
         logger.info("scrape %s", channel)
         ids = scrape_channel(
@@ -36,7 +37,7 @@ def _scrape_once(settings: dict, *, only_new: bool, first: bool) -> list[int]:
             download_photos=settings["download_photos"],
             database=settings["database"],
             only_new=only_new,
-            proxy=settings["telegram_proxy"],
+            proxy=proxy,
         )
         saved.extend(ids)
     return saved
@@ -54,18 +55,20 @@ def _queue_summary(database) -> str:
 def main() -> None:
     settings = load_settings()
     setup_logging(settings["log_file"], level=settings["log_level"])
+    scraper_proxy = settings["telegram_proxy"] if settings.get("scraper_use_proxy", True) else None
 
     logger.info(
-        "SCRAPE ONLY (Telegram via proxy) | channels=%s | proxy=%s | "
+        "SCRAPE ONLY | channels=%s | proxy=%s | "
         "poll_interval=%ss | db=%s | log=%s",
         settings["channels"],
-        settings["telegram_proxy"],
+        scraper_proxy or "direct",
         settings["poll_interval"],
         settings["database"],
         settings["log_file"],
     )
     logger.info(
-        "Posts are queued in DB. Run publish.py with VPN OFF to send to WeMessenger."
+        "Posts are queued in DB. Run publish.py to send them to WeMessenger; "
+        "it will use the configured telegram_proxy when available."
     )
     logger.info("Queue now: %s", _queue_summary(settings["database"]))
 
@@ -81,12 +84,12 @@ def main() -> None:
         try:
             # Reachability hint on first tick
             started = datetime.now(timezone.utc).strftime("%H:%M:%S")
-            if not telegram_reachable(settings["telegram_proxy"]):
+            if not telegram_reachable(scraper_proxy):
                 logger.warning(
                     "[%s] Telegram may be unreachable via %s — "
-                    "keep VPN/proxy ON for scraping",
+                    "keep proxy ON for scraping when enabled",
                     started,
-                    settings["telegram_proxy"] or "direct",
+                    scraper_proxy or "direct",
                 )
 
             run_poller(
@@ -95,7 +98,7 @@ def main() -> None:
                 limit=settings["limit"],
                 download_photos=settings["download_photos"],
                 database=settings["database"],
-                proxy=settings["telegram_proxy"],
+                proxy=scraper_proxy,
                 on_posts_saved=on_saved,
             )
         except KeyboardInterrupt:

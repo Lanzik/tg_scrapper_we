@@ -25,7 +25,11 @@ log_file: logs/scrape.log
 publish_log_file: logs/publish.log
 log_level: INFO
 
-# SOCKS5 proxy for Telegram scrape only (main.py)
+# Independent proxy toggles for each outbound path
+scraper_use_proxy: true
+publish_use_proxy: false
+
+# SOCKS5 proxy URL; enabled only when the relevant flag above is true
 telegram_proxy: "socks5://127.0.0.1:10808"
 # telegram_proxy: false
 

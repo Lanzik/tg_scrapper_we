@@ -39,6 +39,7 @@ class WeMessengerClient:
         file_upload_url: str | None = None,
         to_category: str = "CHANNEL",
         session_id: str = "*",
+        proxy: str | None = None,
     ) -> None:
         self.bot_token = bot_token.strip()
         self.channel_node = channel_node.strip()
@@ -46,6 +47,7 @@ class WeMessengerClient:
         self.file_upload_url = (file_upload_url or DEFAULT_FILE_UPLOAD_URL).rstrip("/")
         self.to_category = to_category
         self.session_id = session_id or "*"
+        self.proxy = proxy.strip() if isinstance(proxy, str) and proxy.strip() else None
 
         if not self.bot_token:
             raise ValueError("wemessenger.bot_token is required")
@@ -222,7 +224,7 @@ class WeMessengerClient:
             follow_redirects=True,
             timeout=60.0,
             trust_env=False,
-            proxy=None,
+            proxy=self.proxy,
         ) as client:
             if photos:
                 first_bytes, first_name = photos[0]

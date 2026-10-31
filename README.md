@@ -1,11 +1,11 @@
 # Telegram → WeMessenger bridge
 
-Two separate processes (recommended for VPN):
+Two separate processes:
 
 | Script | Network | Job |
 |--------|---------|-----|
-| `python main.py` | **VPN / SOCKS ON** | Scrape Telegram → SQLite + unpublished queue |
-| `python publish.py` | **VPN OFF** (direct) | Send queue to WeMessenger channel |
+| `python main.py` | **Telegram proxy / VPN ON** | Scrape Telegram → SQLite + unpublished queue |
+| `python publish.py` | **Same proxy if configured** | Send queue to WeMessenger channel via the same outbound proxy |
 
 ## Setup
 
@@ -26,7 +26,7 @@ cd src
 python main.py
 ```
 
-**Terminal 2 — publish (VPN off):**
+**Terminal 2 — publish (uses the configured proxy when available):**
 ```bash
 source .venv/bin/activate
 cd src
@@ -39,11 +39,19 @@ python publish.py
 channels:
   - "@Khabar_Fouri"
   - "@khabaronline_ir"
+
+scraper_use_proxy: true
+publish_use_proxy: false
 telegram_proxy: "socks5://127.0.0.1:10808"
+
 send_delay_seconds: 20
 log_file: logs/scrape.log
 publish_log_file: logs/publish.log
 ```
+
+- `scraper_use_proxy: true` → scraper sends Telegram requests through the proxy
+- `publish_use_proxy: false` → publisher uses direct connection for WeMessenger
+- set either one to `true` or `false` independently
 
 ## Behavior
 

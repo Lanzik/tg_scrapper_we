@@ -118,6 +118,9 @@ def load_settings(path: Path | None = None) -> dict:
     else:
         telegram_proxy = str(proxy_raw).strip()
 
+    scraper_use_proxy = bool(data.get("scraper_use_proxy", True))
+    publish_use_proxy = bool(data.get("publish_use_proxy", False))
+
     return {
         "channels": channels,
         "limit": None if limit_value == 0 else limit_value,
@@ -128,6 +131,8 @@ def load_settings(path: Path | None = None) -> dict:
         "publish_interval": publish_interval,
         "send_delay_seconds": send_delay_seconds,
         "telegram_proxy": telegram_proxy,
+        "scraper_use_proxy": scraper_use_proxy,
+        "publish_use_proxy": publish_use_proxy,
         "log_file": log_path,
         "publish_log_file": publish_log_path,
         "log_level": str(data.get("log_level") or "INFO").strip() or "INFO",
