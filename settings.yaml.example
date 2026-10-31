@@ -1,0 +1,29 @@
+channels:
+  - "@Khabar_Fouri"
+  - "@khabaronline_ir"
+
+limit: 50
+download_photos: true
+database: data/telegram.db
+
+poll: true
+poll_interval: 10
+publish_interval: 15
+send_delay_seconds: 20
+
+log_file: logs/scrape.log
+publish_log_file: logs/publish.log
+log_level: INFO
+
+# Used by main.py (Telegram scrape)
+telegram_proxy: "socks5://127.0.0.1:10808"
+
+# Used by publish.py (WeMessenger — run with VPN OFF, no proxy)
+wemessenger:
+  enabled: true
+  bot_token: "PASTE_BOT_TOKEN"
+  channel_node: "PASTE_CHANNEL_UUID"
+  api_base: "https://api.wemessenger.ir"
+  file_upload_url: "https://ms-file.wemessenger.ir/upload"
+  to_category: "CHANNEL"
+  session_id: "*"

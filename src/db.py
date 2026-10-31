@@ -1,0 +1,348 @@
+"""SQLite storage for scraped Telegram posts, photos, and publish queue."""
+
+from __future__ import annotations
+
+import sqlite3
+from datetime import datetime, timezone
+from pathlib import Path
+
+SCHEMA = """
+PRAGMA foreign_keys = ON;
+
+CREATE TABLE IF NOT EXISTS channels (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    username    TEXT    NOT NULL UNIQUE,
+    title       TEXT,
+    source      TEXT,
+    updated_at  TEXT    NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS posts (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    channel_id  INTEGER NOT NULL REFERENCES channels(id) ON DELETE CASCADE,
+    message_id  INTEGER NOT NULL,
+    date        TEXT,
+    text        TEXT,
+    views       TEXT,
+    source      TEXT,
+    scraped_at  TEXT    NOT NULL,
+    UNIQUE (channel_id, message_id)
+);
+
+CREATE TABLE IF NOT EXISTS photos (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    post_id     INTEGER NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
+    position    INTEGER NOT NULL DEFAULT 1,
+    url         TEXT,
+    file_path   TEXT,
+    image       BLOB,
+    UNIQUE (post_id, position)
+);
+
+-- Unpublished queue for WeMessenger (and future targets)
+CREATE TABLE IF NOT EXISTS publish_queue (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    post_id     INTEGER NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
+    target      TEXT    NOT NULL,
+    status      TEXT    NOT NULL,   -- pending | sent | failed
+    queued_at   TEXT    NOT NULL,
+    sent_at     TEXT,
+    error       TEXT,
+    UNIQUE (post_id, target)
+);
+
+CREATE INDEX IF NOT EXISTS idx_posts_channel ON posts(channel_id);
+CREATE INDEX IF NOT EXISTS idx_posts_date ON posts(date);
+CREATE INDEX IF NOT EXISTS idx_photos_post ON photos(post_id);
+CREATE INDEX IF NOT EXISTS idx_publish_queue_status ON publish_queue(target, status);
+"""
+
+
+def _now() -> str:
+    return datetime.now(timezone.utc).isoformat()
+
+
+class Database:
+    def __init__(self, path: Path) -> None:
+        self.path = path
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        self.conn = sqlite3.connect(self.path)
+        self.conn.row_factory = sqlite3.Row
+        self.conn.executescript(SCHEMA)
+        self._migrate_from_deliveries()
+        self._backfill_missing_queue_rows()
+        self.conn.commit()
+
+    def _migrate_from_deliveries(self) -> None:
+        """Copy legacy deliveries table into publish_queue once."""
+        row = self.conn.execute(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name='deliveries'"
+        ).fetchone()
+        if not row:
+            return
+        self.conn.execute(
+            """
+            INSERT OR IGNORE INTO publish_queue
+                (post_id, target, status, queued_at, sent_at, error)
+            SELECT
+                post_id,
+                target,
+                status,
+                COALESCE(sent_at, ?),
+                CASE WHEN status = 'sent' THEN sent_at ELSE NULL END,
+                error
+            FROM deliveries
+            """,
+            (_now(),),
+        )
+
+    def _backfill_missing_queue_rows(self) -> None:
+        """Any post without a queue row becomes pending (unpublished)."""
+        self.conn.execute(
+            """
+            INSERT INTO publish_queue (post_id, target, status, queued_at, sent_at, error)
+            SELECT p.id, 'wemessenger', 'pending', ?, NULL, NULL
+            FROM posts p
+            WHERE NOT EXISTS (
+                SELECT 1 FROM publish_queue q
+                WHERE q.post_id = p.id AND q.target = 'wemessenger'
+            )
+            """,
+            (_now(),),
+        )
+
+    def close(self) -> None:
+        self.conn.close()
+
+    def __enter__(self) -> Database:
+        return self
+
+    def __exit__(self, *args) -> None:
+        self.close()
+
+    def upsert_channel(self, username: str, title: str | None, source: str, updated_at: str) -> int:
+        self.conn.execute(
+            """
+            INSERT INTO channels (username, title, source, updated_at)
+            VALUES (?, ?, ?, ?)
+            ON CONFLICT(username) DO UPDATE SET
+                title = excluded.title,
+                source = excluded.source,
+                updated_at = excluded.updated_at
+            """,
+            (username, title, source, updated_at),
+        )
+        row = self.conn.execute(
+            "SELECT id FROM channels WHERE username = ?", (username,)
+        ).fetchone()
+        self.conn.commit()
+        return int(row["id"])
+
+    def upsert_post(
+        self,
+        channel_id: int,
+        *,
+        message_id: int,
+        date: str | None,
+        text: str,
+        views: str | None,
+        source: str,
+        scraped_at: str,
+    ) -> int:
+        self.conn.execute(
+            """
+            INSERT INTO posts (channel_id, message_id, date, text, views, source, scraped_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(channel_id, message_id) DO UPDATE SET
+                date = excluded.date,
+                text = excluded.text,
+                views = excluded.views,
+                source = excluded.source,
+                scraped_at = excluded.scraped_at
+            """,
+            (channel_id, message_id, date, text, views, source, scraped_at),
+        )
+        row = self.conn.execute(
+            """
+            SELECT id FROM posts
+            WHERE channel_id = ? AND message_id = ?
+            """,
+            (channel_id, message_id),
+        ).fetchone()
+        self.conn.commit()
+        return int(row["id"])
+
+    def replace_photos(
+        self,
+        post_id: int,
+        photos: list[dict],
+    ) -> None:
+        """photos items: position, url, file_path, image (bytes|None)."""
+        self.conn.execute("DELETE FROM photos WHERE post_id = ?", (post_id,))
+        self.conn.executemany(
+            """
+            INSERT INTO photos (post_id, position, url, file_path, image)
+            VALUES (?, ?, ?, ?, ?)
+            """,
+            [
+                (
+                    post_id,
+                    p["position"],
+                    p.get("url"),
+                    p.get("file_path"),
+                    p.get("image"),
+                )
+                for p in photos
+            ],
+        )
+        self.conn.commit()
+
+    def get_channel_id(self, username: str) -> int | None:
+        row = self.conn.execute(
+            "SELECT id FROM channels WHERE username = ?", (username,)
+        ).fetchone()
+        return int(row["id"]) if row else None
+
+    def get_max_message_id(self, username: str) -> int | None:
+        row = self.conn.execute(
+            """
+            SELECT MAX(p.message_id) AS max_id
+            FROM posts p
+            JOIN channels c ON c.id = p.channel_id
+            WHERE c.username = ?
+            """,
+            (username,),
+        ).fetchone()
+        if not row or row["max_id"] is None:
+            return None
+        return int(row["max_id"])
+
+    def has_post(self, channel_id: int, message_id: int) -> bool:
+        row = self.conn.execute(
+            """
+            SELECT 1 FROM posts
+            WHERE channel_id = ? AND message_id = ?
+            """,
+            (channel_id, message_id),
+        ).fetchone()
+        return row is not None
+
+    def get_post(self, post_id: int) -> sqlite3.Row | None:
+        return self.conn.execute(
+            "SELECT * FROM posts WHERE id = ?", (post_id,)
+        ).fetchone()
+
+    def get_photos(self, post_id: int) -> list[sqlite3.Row]:
+        return list(
+            self.conn.execute(
+                """
+                SELECT * FROM photos
+                WHERE post_id = ?
+                ORDER BY position ASC
+                """,
+                (post_id,),
+            )
+        )
+
+    def enqueue_for_publish(
+        self,
+        post_id: int,
+        *,
+        target: str = "wemessenger",
+    ) -> None:
+        """
+        Put post on unpublished queue.
+
+        Never downgrades an already-sent item back to pending.
+        """
+        existing = self.conn.execute(
+            """
+            SELECT status FROM publish_queue
+            WHERE post_id = ? AND target = ?
+            """,
+            (post_id, target),
+        ).fetchone()
+        if existing and existing["status"] == "sent":
+            return
+
+        self.conn.execute(
+            """
+            INSERT INTO publish_queue (post_id, target, status, queued_at, sent_at, error)
+            VALUES (?, ?, 'pending', ?, NULL, NULL)
+            ON CONFLICT(post_id, target) DO UPDATE SET
+                status = 'pending',
+                error = NULL
+            WHERE publish_queue.status != 'sent'
+            """,
+            (post_id, target, _now()),
+        )
+        self.conn.commit()
+
+    def enqueue_many(self, post_ids: list[int], *, target: str = "wemessenger") -> int:
+        for post_id in post_ids:
+            self.enqueue_for_publish(post_id, target=target)
+        return len(post_ids)
+
+    def is_delivered(self, post_id: int, target: str = "wemessenger") -> bool:
+        row = self.conn.execute(
+            """
+            SELECT status FROM publish_queue
+            WHERE post_id = ? AND target = ?
+            """,
+            (post_id, target),
+        ).fetchone()
+        return bool(row and row["status"] == "sent")
+
+    def mark_delivery(
+        self,
+        post_id: int,
+        *,
+        target: str = "wemessenger",
+        status: str,
+        sent_at: str | None = None,
+        error: str | None = None,
+    ) -> None:
+        queued_at = _now()
+        self.conn.execute(
+            """
+            INSERT INTO publish_queue (post_id, target, status, queued_at, sent_at, error)
+            VALUES (?, ?, ?, ?, ?, ?)
+            ON CONFLICT(post_id, target) DO UPDATE SET
+                status = excluded.status,
+                sent_at = excluded.sent_at,
+                error = excluded.error
+            """,
+            (post_id, target, status, queued_at, sent_at, error),
+        )
+        self.conn.commit()
+
+    def get_pending_delivery_post_ids(self, target: str = "wemessenger") -> list[int]:
+        """Unpublished queue: pending or failed (retry)."""
+        rows = self.conn.execute(
+            """
+            SELECT q.post_id AS id
+            FROM publish_queue q
+            JOIN posts p ON p.id = q.post_id
+            WHERE q.target = ?
+              AND q.status IN ('pending', 'failed')
+            ORDER BY q.queued_at ASC, p.message_id ASC, p.id ASC
+            """,
+            (target,),
+        ).fetchall()
+        return [int(r["id"]) for r in rows]
+
+    def count_queue(self, target: str = "wemessenger") -> dict[str, int]:
+        rows = self.conn.execute(
+            """
+            SELECT status, COUNT(*) AS n
+            FROM publish_queue
+            WHERE target = ?
+            GROUP BY status
+            """,
+            (target,),
+        ).fetchall()
+        counts = {"pending": 0, "failed": 0, "sent": 0}
+        for row in rows:
+            counts[str(row["status"])] = int(row["n"])
+        counts["unpublished"] = counts["pending"] + counts["failed"]
+        return counts
