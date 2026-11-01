@@ -5,7 +5,30 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
+from scraper import _collect_posts
 from wm_client import build_wemessenger
+
+
+class ScraperGuardTests(unittest.TestCase):
+    def test_collect_posts_rejects_challenge_page_html(self):
+        class FakeResponse:
+            status_code = 200
+            text = """
+            <html>
+              <head><title>Checking your browser</title></head>
+              <body><p>Please wait a few seconds while we verify you are not a bot.</p></body>
+            </html>
+            """
+
+            def raise_for_status(self):
+                return None
+
+        class FakeClient:
+            def get(self, _url):
+                return FakeResponse()
+
+        with self.assertRaisesRegex(RuntimeError, "no channel content|challenge|bot"):
+            _collect_posts(FakeClient(), "Khabar_Fouri", limit=10)
 
 
 class WemessengerProxyTests(unittest.TestCase):

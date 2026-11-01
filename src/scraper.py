@@ -95,6 +95,33 @@ def _parse_page(html: str) -> tuple[str | None, list[dict]]:
     return title, posts
 
 
+def _looks_like_telegram_channel_html(html: str) -> bool:
+    """Return True only when the response looks like a real public-channel page."""
+    if not html or not html.strip():
+        return False
+
+    lowered = html.lower()
+    has_channel_markers = (
+        "tgme_widget_message" in lowered
+        or "tgme_channel_info_header_title" in lowered
+        or "data-post" in lowered
+    )
+    if not has_channel_markers:
+        challenge_markers = (
+            "checking your browser",
+            "please wait a few seconds",
+            "verify you are human",
+            "captcha",
+            "cloudflare",
+            "challenge",
+            "not a robot",
+        )
+        if any(marker in lowered for marker in challenge_markers):
+            return False
+        return False
+    return True
+
+
 def _download_bytes(client: httpx.Client, url: str) -> tuple[bytes | None, str]:
     """Return (content, preferred_suffix)."""
     try:
@@ -137,11 +164,24 @@ def _collect_posts(
             )
         response.raise_for_status()
 
+        if not _looks_like_telegram_channel_html(response.text):
+            snippet = re.sub(r"\s+", " ", response.text[:500]).strip()
+            raise RuntimeError(
+                f"Telegram returned HTTP {response.status_code} but no channel content for @{username}. "
+                "This usually means a bot/challenge page or a blocked/proxy response. "
+                f"Snippet: {snippet!r}"
+            )
+
         page_title, posts = _parse_page(response.text)
         if page_title:
             title = page_title
 
         if not posts:
+            if not page_title:
+                raise RuntimeError(
+                    f"Telegram returned HTTP {response.status_code} for @{username}, "
+                    "but the page contained no visible post markup."
+                )
             break
 
         new_on_page = 0
