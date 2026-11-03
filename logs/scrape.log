@@ -3105,3 +3105,757 @@
 2026-11-03 14:22:30 [ERROR] publisher: WeMessenger FAIL #472211: sendMessage HTTP 403: {}
 2026-11-03 14:22:30 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
 2026-11-03 14:22:30 [ERROR] publisher: WeMessenger FAIL #472213: getAuthToken HTTP 403: 
+2026-11-03 14:22:30 [INFO] wemessenger: WeMessenger send text (146 chars)
+2026-11-03 14:22:30 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:22:30 [ERROR] publisher: WeMessenger FAIL #472214: sendMessage HTTP 403: {}
+2026-11-03 14:22:30 [INFO] wemessenger: WeMessenger send text (261 chars)
+2026-11-03 14:22:30 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:22:30 [ERROR] publisher: WeMessenger FAIL #472215: sendMessage HTTP 403: {}
+2026-11-03 14:22:30 [INFO] wemessenger: WeMessenger send text (255 chars)
+2026-11-03 14:22:31 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:22:31 [ERROR] publisher: WeMessenger FAIL #472216: sendMessage HTTP 403: {}
+2026-11-03 14:22:31 [INFO] wemessenger: WeMessenger send text (235 chars)
+2026-11-03 14:22:31 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:22:31 [ERROR] publisher: WeMessenger FAIL #472217: sendMessage HTTP 403: {}
+2026-11-03 14:22:31 [INFO] wemessenger: WeMessenger send text (257 chars)
+2026-11-03 14:22:31 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:22:31 [ERROR] publisher: WeMessenger FAIL #472218: sendMessage HTTP 403: {}
+2026-11-03 14:22:31 [INFO] wemessenger: WeMessenger send text (256 chars)
+2026-11-03 14:22:32 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:22:32 [ERROR] publisher: WeMessenger FAIL #472219: sendMessage HTTP 403: {}
+2026-11-03 14:22:32 [INFO] wemessenger: WeMessenger send text (258 chars)
+2026-11-03 14:22:32 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:22:32 [ERROR] publisher: WeMessenger FAIL #472220: sendMessage HTTP 403: {}
+2026-11-03 14:22:32 [INFO] wemessenger: WeMessenger send text (154 chars)
+2026-11-03 14:22:32 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:22:32 [ERROR] publisher: WeMessenger FAIL #472221: sendMessage HTTP 403: {}
+2026-11-03 14:22:32 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:22:32 [ERROR] publisher: WeMessenger FAIL #472222: getAuthToken HTTP 403: 
+2026-11-03 14:22:32 [INFO] wemessenger: WeMessenger send text (97 chars)
+2026-11-03 14:22:33 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:22:33 [ERROR] publisher: WeMessenger FAIL #472227: sendMessage HTTP 403: {}
+2026-11-03 14:22:33 [INFO] wemessenger: WeMessenger send text (532 chars)
+2026-11-03 14:22:33 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:22:33 [ERROR] publisher: WeMessenger FAIL #472228: sendMessage HTTP 403: {}
+2026-11-03 14:22:33 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:22:33 [ERROR] publisher: WeMessenger FAIL #472229: getAuthToken HTTP 403: 
+2026-11-03 14:22:33 [INFO] wemessenger: WeMessenger send text (1039 chars)
+2026-11-03 14:22:34 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:22:34 [ERROR] publisher: WeMessenger FAIL #472230: sendMessage HTTP 403: {}
+2026-11-03 14:22:34 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:22:34 [ERROR] publisher: WeMessenger FAIL #472231: getAuthToken HTTP 403: 
+2026-11-03 14:22:34 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:22:34 [ERROR] publisher: WeMessenger FAIL #472232: getAuthToken HTTP 403: 
+2026-11-03 14:22:34 [INFO] wemessenger: WeMessenger send text (256 chars)
+2026-11-03 14:22:35 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:22:35 [ERROR] publisher: WeMessenger FAIL #472233: sendMessage HTTP 403: {}
+2026-11-03 14:22:35 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:22:35 [ERROR] publisher: WeMessenger FAIL #472234: getAuthToken HTTP 403: 
+2026-11-03 14:22:35 [INFO] wemessenger: WeMessenger send text (282 chars)
+2026-11-03 14:22:35 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:22:35 [ERROR] publisher: WeMessenger FAIL #472235: sendMessage HTTP 403: {}
+2026-11-03 14:22:36 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:22:36 [ERROR] publisher: WeMessenger FAIL #472236: getAuthToken HTTP 403: 
+2026-11-03 14:22:36 [INFO] wemessenger: WeMessenger send text (258 chars)
+2026-11-03 14:22:36 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:22:36 [ERROR] publisher: WeMessenger FAIL #472237: sendMessage HTTP 403: {}
+2026-11-03 14:22:36 [INFO] publisher: queue after publish: unpublished=51 pending=0 failed=51 sent=0
+2026-11-03 14:22:36 [INFO] __main__: published 0/51 post(s) from @Farsna
+2026-11-03 14:22:37 [INFO] httpx: HTTP Request: GET https://t.me/s/Farsna "HTTP/1.1 200 OK"
+2026-11-03 14:22:51 [INFO] httpx: HTTP Request: GET https://api.wemessenger.ir/ "HTTP/1.1 404 Not Found"
+2026-11-03 14:22:51 [INFO] publisher: unpublished queue: 51 (pending=0, failed=51)
+2026-11-03 14:22:51 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:22:51 [ERROR] publisher: WeMessenger FAIL #472168: getAuthToken HTTP 403: 
+2026-11-03 14:22:52 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:22:52 [ERROR] publisher: WeMessenger FAIL #472169: getAuthToken HTTP 403: 
+2026-11-03 14:22:52 [INFO] wemessenger: WeMessenger send text (842 chars)
+2026-11-03 14:22:52 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:22:52 [ERROR] publisher: WeMessenger FAIL #472170: sendMessage HTTP 403: {}
+2026-11-03 14:22:52 [INFO] wemessenger: WeMessenger send text (62 chars)
+2026-11-03 14:22:53 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:22:53 [ERROR] publisher: WeMessenger FAIL #472171: sendMessage HTTP 403: {}
+2026-11-03 14:22:53 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:22:53 [ERROR] publisher: WeMessenger FAIL #472172: getAuthToken HTTP 403: 
+2026-11-03 14:22:53 [INFO] wemessenger: WeMessenger send text (128 chars)
+2026-11-03 14:22:53 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:22:53 [ERROR] publisher: WeMessenger FAIL #472179: sendMessage HTTP 403: {}
+2026-11-03 14:22:53 [INFO] wemessenger: WeMessenger send text (128 chars)
+2026-11-03 14:22:53 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:22:53 [ERROR] publisher: WeMessenger FAIL #472180: sendMessage HTTP 403: {}
+2026-11-03 14:22:54 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:22:54 [ERROR] publisher: WeMessenger FAIL #472181: getAuthToken HTTP 403: 
+2026-11-03 14:22:54 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:22:54 [ERROR] publisher: WeMessenger FAIL #472182: getAuthToken HTTP 403: 
+2026-11-03 14:22:54 [INFO] wemessenger: WeMessenger send text (531 chars)
+2026-11-03 14:22:54 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:22:54 [ERROR] publisher: WeMessenger FAIL #472183: sendMessage HTTP 403: {}
+2026-11-03 14:22:54 [INFO] wemessenger: WeMessenger send text (217 chars)
+2026-11-03 14:22:55 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:22:55 [ERROR] publisher: WeMessenger FAIL #472184: sendMessage HTTP 403: {}
+2026-11-03 14:22:55 [INFO] wemessenger: WeMessenger send text (367 chars)
+2026-11-03 14:22:55 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:22:55 [ERROR] publisher: WeMessenger FAIL #472185: sendMessage HTTP 403: {}
+2026-11-03 14:22:56 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:22:56 [ERROR] publisher: WeMessenger FAIL #472186: getAuthToken HTTP 403: 
+2026-11-03 14:22:56 [INFO] wemessenger: WeMessenger send text (493 chars)
+2026-11-03 14:22:56 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:22:56 [ERROR] publisher: WeMessenger FAIL #472193: sendMessage HTTP 403: {}
+2026-11-03 14:22:57 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:22:57 [ERROR] publisher: WeMessenger FAIL #472194: getAuthToken HTTP 403: 
+2026-11-03 14:22:57 [INFO] wemessenger: WeMessenger send text (141 chars)
+2026-11-03 14:22:57 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:22:57 [ERROR] publisher: WeMessenger FAIL #472195: sendMessage HTTP 403: {}
+2026-11-03 14:22:57 [INFO] wemessenger: WeMessenger send text (173 chars)
+2026-11-03 14:22:58 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:22:58 [ERROR] publisher: WeMessenger FAIL #472196: sendMessage HTTP 403: {}
+2026-11-03 14:22:58 [INFO] wemessenger: WeMessenger send text (231 chars)
+2026-11-03 14:22:58 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:22:58 [ERROR] publisher: WeMessenger FAIL #472197: sendMessage HTTP 403: {}
+2026-11-03 14:22:58 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:22:58 [ERROR] publisher: WeMessenger FAIL #472198: getAuthToken HTTP 403: 
+2026-11-03 14:22:58 [INFO] wemessenger: WeMessenger send text (31 chars)
+2026-11-03 14:22:59 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:22:59 [ERROR] publisher: WeMessenger FAIL #472199: sendMessage HTTP 403: {}
+2026-11-03 14:22:59 [INFO] wemessenger: WeMessenger send text (276 chars)
+2026-11-03 14:22:59 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:22:59 [ERROR] publisher: WeMessenger FAIL #472200: sendMessage HTTP 403: {}
+2026-11-03 14:22:59 [INFO] wemessenger: WeMessenger send text (258 chars)
+2026-11-03 14:23:00 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:00 [ERROR] publisher: WeMessenger FAIL #472201: sendMessage HTTP 403: {}
+2026-11-03 14:23:00 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:00 [ERROR] publisher: WeMessenger FAIL #472202: getAuthToken HTTP 403: 
+2026-11-03 14:23:00 [INFO] wemessenger: WeMessenger send text (708 chars)
+2026-11-03 14:23:01 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:01 [ERROR] publisher: WeMessenger FAIL #472203: sendMessage HTTP 403: {}
+2026-11-03 14:23:01 [INFO] wemessenger: WeMessenger send text (256 chars)
+2026-11-03 14:23:01 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:01 [ERROR] publisher: WeMessenger FAIL #472204: sendMessage HTTP 403: {}
+2026-11-03 14:23:01 [INFO] wemessenger: WeMessenger send text (168 chars)
+2026-11-03 14:23:01 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:01 [ERROR] publisher: WeMessenger FAIL #472205: sendMessage HTTP 403: {}
+2026-11-03 14:23:01 [INFO] wemessenger: WeMessenger send text (258 chars)
+2026-11-03 14:23:02 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:02 [ERROR] publisher: WeMessenger FAIL #472206: sendMessage HTTP 403: {}
+2026-11-03 14:23:02 [INFO] wemessenger: WeMessenger send text (176 chars)
+2026-11-03 14:23:02 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:02 [ERROR] publisher: WeMessenger FAIL #472208: sendMessage HTTP 403: {}
+2026-11-03 14:23:02 [INFO] wemessenger: WeMessenger send text (259 chars)
+2026-11-03 14:23:02 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:02 [ERROR] publisher: WeMessenger FAIL #472209: sendMessage HTTP 403: {}
+2026-11-03 14:23:02 [INFO] wemessenger: WeMessenger send text (508 chars)
+2026-11-03 14:23:03 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:03 [ERROR] publisher: WeMessenger FAIL #472211: sendMessage HTTP 403: {}
+2026-11-03 14:23:03 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:03 [ERROR] publisher: WeMessenger FAIL #472213: getAuthToken HTTP 403: 
+2026-11-03 14:23:03 [INFO] wemessenger: WeMessenger send text (146 chars)
+2026-11-03 14:23:04 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:04 [ERROR] publisher: WeMessenger FAIL #472214: sendMessage HTTP 403: {}
+2026-11-03 14:23:04 [INFO] wemessenger: WeMessenger send text (261 chars)
+2026-11-03 14:23:04 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:04 [ERROR] publisher: WeMessenger FAIL #472215: sendMessage HTTP 403: {}
+2026-11-03 14:23:04 [INFO] wemessenger: WeMessenger send text (255 chars)
+2026-11-03 14:23:05 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:05 [ERROR] publisher: WeMessenger FAIL #472216: sendMessage HTTP 403: {}
+2026-11-03 14:23:05 [INFO] wemessenger: WeMessenger send text (235 chars)
+2026-11-03 14:23:05 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:05 [ERROR] publisher: WeMessenger FAIL #472217: sendMessage HTTP 403: {}
+2026-11-03 14:23:05 [INFO] wemessenger: WeMessenger send text (257 chars)
+2026-11-03 14:23:05 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:05 [ERROR] publisher: WeMessenger FAIL #472218: sendMessage HTTP 403: {}
+2026-11-03 14:23:05 [INFO] wemessenger: WeMessenger send text (256 chars)
+2026-11-03 14:23:05 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:05 [ERROR] publisher: WeMessenger FAIL #472219: sendMessage HTTP 403: {}
+2026-11-03 14:23:05 [INFO] wemessenger: WeMessenger send text (258 chars)
+2026-11-03 14:23:06 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:06 [ERROR] publisher: WeMessenger FAIL #472220: sendMessage HTTP 403: {}
+2026-11-03 14:23:06 [INFO] wemessenger: WeMessenger send text (154 chars)
+2026-11-03 14:23:06 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:06 [ERROR] publisher: WeMessenger FAIL #472221: sendMessage HTTP 403: {}
+2026-11-03 14:23:06 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:06 [ERROR] publisher: WeMessenger FAIL #472222: getAuthToken HTTP 403: 
+2026-11-03 14:23:06 [INFO] wemessenger: WeMessenger send text (97 chars)
+2026-11-03 14:23:07 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:07 [ERROR] publisher: WeMessenger FAIL #472227: sendMessage HTTP 403: {}
+2026-11-03 14:23:07 [INFO] wemessenger: WeMessenger send text (532 chars)
+2026-11-03 14:23:07 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:07 [ERROR] publisher: WeMessenger FAIL #472228: sendMessage HTTP 403: {}
+2026-11-03 14:23:07 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:07 [ERROR] publisher: WeMessenger FAIL #472229: getAuthToken HTTP 403: 
+2026-11-03 14:23:08 [INFO] wemessenger: WeMessenger send text (1039 chars)
+2026-11-03 14:23:08 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:08 [ERROR] publisher: WeMessenger FAIL #472230: sendMessage HTTP 403: {}
+2026-11-03 14:23:08 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:08 [ERROR] publisher: WeMessenger FAIL #472231: getAuthToken HTTP 403: 
+2026-11-03 14:23:09 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:09 [ERROR] publisher: WeMessenger FAIL #472232: getAuthToken HTTP 403: 
+2026-11-03 14:23:09 [INFO] wemessenger: WeMessenger send text (256 chars)
+2026-11-03 14:23:09 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:09 [ERROR] publisher: WeMessenger FAIL #472233: sendMessage HTTP 403: {}
+2026-11-03 14:23:09 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:09 [ERROR] publisher: WeMessenger FAIL #472234: getAuthToken HTTP 403: 
+2026-11-03 14:23:09 [INFO] wemessenger: WeMessenger send text (282 chars)
+2026-11-03 14:23:10 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:10 [ERROR] publisher: WeMessenger FAIL #472235: sendMessage HTTP 403: {}
+2026-11-03 14:23:10 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:10 [ERROR] publisher: WeMessenger FAIL #472236: getAuthToken HTTP 403: 
+2026-11-03 14:23:10 [INFO] wemessenger: WeMessenger send text (258 chars)
+2026-11-03 14:23:10 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:10 [ERROR] publisher: WeMessenger FAIL #472237: sendMessage HTTP 403: {}
+2026-11-03 14:23:10 [INFO] publisher: queue after publish: unpublished=51 pending=0 failed=51 sent=0
+2026-11-03 14:23:10 [INFO] __main__: published 0/51 post(s) from @Farsna
+2026-11-03 14:23:11 [INFO] httpx: HTTP Request: GET https://t.me/s/Farsna "HTTP/1.1 200 OK"
+2026-11-03 14:23:25 [INFO] httpx: HTTP Request: GET https://api.wemessenger.ir/ "HTTP/1.1 404 Not Found"
+2026-11-03 14:23:25 [INFO] publisher: unpublished queue: 51 (pending=0, failed=51)
+2026-11-03 14:23:26 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:26 [ERROR] publisher: WeMessenger FAIL #472168: getAuthToken HTTP 403: 
+2026-11-03 14:23:26 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:26 [ERROR] publisher: WeMessenger FAIL #472169: getAuthToken HTTP 403: 
+2026-11-03 14:23:26 [INFO] wemessenger: WeMessenger send text (842 chars)
+2026-11-03 14:23:26 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:26 [ERROR] publisher: WeMessenger FAIL #472170: sendMessage HTTP 403: {}
+2026-11-03 14:23:26 [INFO] wemessenger: WeMessenger send text (62 chars)
+2026-11-03 14:23:26 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:26 [ERROR] publisher: WeMessenger FAIL #472171: sendMessage HTTP 403: {}
+2026-11-03 14:23:27 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:27 [ERROR] publisher: WeMessenger FAIL #472172: getAuthToken HTTP 403: 
+2026-11-03 14:23:27 [INFO] wemessenger: WeMessenger send text (128 chars)
+2026-11-03 14:23:27 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:27 [ERROR] publisher: WeMessenger FAIL #472179: sendMessage HTTP 403: {}
+2026-11-03 14:23:27 [INFO] wemessenger: WeMessenger send text (128 chars)
+2026-11-03 14:23:27 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:27 [ERROR] publisher: WeMessenger FAIL #472180: sendMessage HTTP 403: {}
+2026-11-03 14:23:28 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:28 [ERROR] publisher: WeMessenger FAIL #472181: getAuthToken HTTP 403: 
+2026-11-03 14:23:28 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:28 [ERROR] publisher: WeMessenger FAIL #472182: getAuthToken HTTP 403: 
+2026-11-03 14:23:28 [INFO] wemessenger: WeMessenger send text (531 chars)
+2026-11-03 14:23:28 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:28 [ERROR] publisher: WeMessenger FAIL #472183: sendMessage HTTP 403: {}
+2026-11-03 14:23:28 [INFO] wemessenger: WeMessenger send text (217 chars)
+2026-11-03 14:23:29 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:29 [ERROR] publisher: WeMessenger FAIL #472184: sendMessage HTTP 403: {}
+2026-11-03 14:23:29 [INFO] wemessenger: WeMessenger send text (367 chars)
+2026-11-03 14:23:29 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:29 [ERROR] publisher: WeMessenger FAIL #472185: sendMessage HTTP 403: {}
+2026-11-03 14:23:29 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:29 [ERROR] publisher: WeMessenger FAIL #472186: getAuthToken HTTP 403: 
+2026-11-03 14:23:29 [INFO] wemessenger: WeMessenger send text (493 chars)
+2026-11-03 14:23:30 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:30 [ERROR] publisher: WeMessenger FAIL #472193: sendMessage HTTP 403: {}
+2026-11-03 14:23:30 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:30 [ERROR] publisher: WeMessenger FAIL #472194: getAuthToken HTTP 403: 
+2026-11-03 14:23:30 [INFO] wemessenger: WeMessenger send text (141 chars)
+2026-11-03 14:23:30 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:30 [ERROR] publisher: WeMessenger FAIL #472195: sendMessage HTTP 403: {}
+2026-11-03 14:23:30 [INFO] wemessenger: WeMessenger send text (173 chars)
+2026-11-03 14:23:31 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:31 [ERROR] publisher: WeMessenger FAIL #472196: sendMessage HTTP 403: {}
+2026-11-03 14:23:31 [INFO] wemessenger: WeMessenger send text (231 chars)
+2026-11-03 14:23:32 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:32 [ERROR] publisher: WeMessenger FAIL #472197: sendMessage HTTP 403: {}
+2026-11-03 14:23:32 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:32 [ERROR] publisher: WeMessenger FAIL #472198: getAuthToken HTTP 403: 
+2026-11-03 14:23:32 [INFO] wemessenger: WeMessenger send text (31 chars)
+2026-11-03 14:23:32 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:32 [ERROR] publisher: WeMessenger FAIL #472199: sendMessage HTTP 403: {}
+2026-11-03 14:23:32 [INFO] wemessenger: WeMessenger send text (276 chars)
+2026-11-03 14:23:33 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:33 [ERROR] publisher: WeMessenger FAIL #472200: sendMessage HTTP 403: {}
+2026-11-03 14:23:33 [INFO] wemessenger: WeMessenger send text (258 chars)
+2026-11-03 14:23:33 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:33 [ERROR] publisher: WeMessenger FAIL #472201: sendMessage HTTP 403: {}
+2026-11-03 14:23:33 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:33 [ERROR] publisher: WeMessenger FAIL #472202: getAuthToken HTTP 403: 
+2026-11-03 14:23:33 [INFO] wemessenger: WeMessenger send text (708 chars)
+2026-11-03 14:23:34 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:34 [ERROR] publisher: WeMessenger FAIL #472203: sendMessage HTTP 403: {}
+2026-11-03 14:23:34 [INFO] wemessenger: WeMessenger send text (256 chars)
+2026-11-03 14:23:34 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:34 [ERROR] publisher: WeMessenger FAIL #472204: sendMessage HTTP 403: {}
+2026-11-03 14:23:34 [INFO] wemessenger: WeMessenger send text (168 chars)
+2026-11-03 14:23:34 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:34 [ERROR] publisher: WeMessenger FAIL #472205: sendMessage HTTP 403: {}
+2026-11-03 14:23:34 [INFO] wemessenger: WeMessenger send text (258 chars)
+2026-11-03 14:23:34 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:34 [ERROR] publisher: WeMessenger FAIL #472206: sendMessage HTTP 403: {}
+2026-11-03 14:23:34 [INFO] wemessenger: WeMessenger send text (176 chars)
+2026-11-03 14:23:35 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:35 [ERROR] publisher: WeMessenger FAIL #472208: sendMessage HTTP 403: {}
+2026-11-03 14:23:35 [INFO] wemessenger: WeMessenger send text (259 chars)
+2026-11-03 14:23:35 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:35 [ERROR] publisher: WeMessenger FAIL #472209: sendMessage HTTP 403: {}
+2026-11-03 14:23:35 [INFO] wemessenger: WeMessenger send text (508 chars)
+2026-11-03 14:23:35 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:35 [ERROR] publisher: WeMessenger FAIL #472211: sendMessage HTTP 403: {}
+2026-11-03 14:23:36 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:36 [ERROR] publisher: WeMessenger FAIL #472213: getAuthToken HTTP 403: 
+2026-11-03 14:23:36 [INFO] wemessenger: WeMessenger send text (146 chars)
+2026-11-03 14:23:36 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:36 [ERROR] publisher: WeMessenger FAIL #472214: sendMessage HTTP 403: {}
+2026-11-03 14:23:36 [INFO] wemessenger: WeMessenger send text (261 chars)
+2026-11-03 14:23:36 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:36 [ERROR] publisher: WeMessenger FAIL #472215: sendMessage HTTP 403: {}
+2026-11-03 14:23:36 [INFO] wemessenger: WeMessenger send text (255 chars)
+2026-11-03 14:23:36 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:36 [ERROR] publisher: WeMessenger FAIL #472216: sendMessage HTTP 403: {}
+2026-11-03 14:23:36 [INFO] wemessenger: WeMessenger send text (235 chars)
+2026-11-03 14:23:37 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:37 [ERROR] publisher: WeMessenger FAIL #472217: sendMessage HTTP 403: {}
+2026-11-03 14:23:37 [INFO] wemessenger: WeMessenger send text (257 chars)
+2026-11-03 14:23:37 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:37 [ERROR] publisher: WeMessenger FAIL #472218: sendMessage HTTP 403: {}
+2026-11-03 14:23:37 [INFO] wemessenger: WeMessenger send text (256 chars)
+2026-11-03 14:23:38 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:38 [ERROR] publisher: WeMessenger FAIL #472219: sendMessage HTTP 403: {}
+2026-11-03 14:23:38 [INFO] wemessenger: WeMessenger send text (258 chars)
+2026-11-03 14:23:38 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:38 [ERROR] publisher: WeMessenger FAIL #472220: sendMessage HTTP 403: {}
+2026-11-03 14:23:38 [INFO] wemessenger: WeMessenger send text (154 chars)
+2026-11-03 14:23:38 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:38 [ERROR] publisher: WeMessenger FAIL #472221: sendMessage HTTP 403: {}
+2026-11-03 14:23:39 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:39 [ERROR] publisher: WeMessenger FAIL #472222: getAuthToken HTTP 403: 
+2026-11-03 14:23:39 [INFO] wemessenger: WeMessenger send text (97 chars)
+2026-11-03 14:23:39 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:39 [ERROR] publisher: WeMessenger FAIL #472227: sendMessage HTTP 403: {}
+2026-11-03 14:23:39 [INFO] wemessenger: WeMessenger send text (532 chars)
+2026-11-03 14:23:39 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:39 [ERROR] publisher: WeMessenger FAIL #472228: sendMessage HTTP 403: {}
+2026-11-03 14:23:39 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:39 [ERROR] publisher: WeMessenger FAIL #472229: getAuthToken HTTP 403: 
+2026-11-03 14:23:39 [INFO] wemessenger: WeMessenger send text (1039 chars)
+2026-11-03 14:23:40 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:40 [ERROR] publisher: WeMessenger FAIL #472230: sendMessage HTTP 403: {}
+2026-11-03 14:23:40 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:40 [ERROR] publisher: WeMessenger FAIL #472231: getAuthToken HTTP 403: 
+2026-11-03 14:23:40 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:40 [ERROR] publisher: WeMessenger FAIL #472232: getAuthToken HTTP 403: 
+2026-11-03 14:23:40 [INFO] wemessenger: WeMessenger send text (256 chars)
+2026-11-03 14:23:41 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:41 [ERROR] publisher: WeMessenger FAIL #472233: sendMessage HTTP 403: {}
+2026-11-03 14:23:41 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:41 [ERROR] publisher: WeMessenger FAIL #472234: getAuthToken HTTP 403: 
+2026-11-03 14:23:41 [INFO] wemessenger: WeMessenger send text (282 chars)
+2026-11-03 14:23:41 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:41 [ERROR] publisher: WeMessenger FAIL #472235: sendMessage HTTP 403: {}
+2026-11-03 14:23:41 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:41 [ERROR] publisher: WeMessenger FAIL #472236: getAuthToken HTTP 403: 
+2026-11-03 14:23:41 [INFO] wemessenger: WeMessenger send text (258 chars)
+2026-11-03 14:23:42 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:42 [ERROR] publisher: WeMessenger FAIL #472237: sendMessage HTTP 403: {}
+2026-11-03 14:23:42 [INFO] publisher: queue after publish: unpublished=51 pending=0 failed=51 sent=0
+2026-11-03 14:23:42 [INFO] __main__: published 0/51 post(s) from @Farsna
+2026-11-03 14:23:44 [INFO] httpx: HTTP Request: GET https://t.me/s/Farsna "HTTP/1.1 200 OK"
+2026-11-03 14:23:57 [INFO] httpx: HTTP Request: GET https://api.wemessenger.ir/ "HTTP/1.1 404 Not Found"
+2026-11-03 14:23:57 [INFO] publisher: unpublished queue: 51 (pending=0, failed=51)
+2026-11-03 14:23:57 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:57 [ERROR] publisher: WeMessenger FAIL #472168: getAuthToken HTTP 403: 
+2026-11-03 14:23:58 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:58 [ERROR] publisher: WeMessenger FAIL #472169: getAuthToken HTTP 403: 
+2026-11-03 14:23:58 [INFO] wemessenger: WeMessenger send text (842 chars)
+2026-11-03 14:23:58 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:58 [ERROR] publisher: WeMessenger FAIL #472170: sendMessage HTTP 403: {}
+2026-11-03 14:23:58 [INFO] wemessenger: WeMessenger send text (62 chars)
+2026-11-03 14:23:58 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:58 [ERROR] publisher: WeMessenger FAIL #472171: sendMessage HTTP 403: {}
+2026-11-03 14:23:58 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:58 [ERROR] publisher: WeMessenger FAIL #472172: getAuthToken HTTP 403: 
+2026-11-03 14:23:59 [INFO] wemessenger: WeMessenger send text (128 chars)
+2026-11-03 14:23:59 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:23:59 [ERROR] publisher: WeMessenger FAIL #472179: sendMessage HTTP 403: {}
+2026-11-03 14:23:59 [INFO] wemessenger: WeMessenger send text (128 chars)
+2026-11-03 14:24:00 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:00 [ERROR] publisher: WeMessenger FAIL #472180: sendMessage HTTP 403: {}
+2026-11-03 14:24:00 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:00 [ERROR] publisher: WeMessenger FAIL #472181: getAuthToken HTTP 403: 
+2026-11-03 14:24:00 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:00 [ERROR] publisher: WeMessenger FAIL #472182: getAuthToken HTTP 403: 
+2026-11-03 14:24:00 [INFO] wemessenger: WeMessenger send text (531 chars)
+2026-11-03 14:24:01 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:01 [ERROR] publisher: WeMessenger FAIL #472183: sendMessage HTTP 403: {}
+2026-11-03 14:24:01 [INFO] wemessenger: WeMessenger send text (217 chars)
+2026-11-03 14:24:01 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:01 [ERROR] publisher: WeMessenger FAIL #472184: sendMessage HTTP 403: {}
+2026-11-03 14:24:01 [INFO] wemessenger: WeMessenger send text (367 chars)
+2026-11-03 14:24:01 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:01 [ERROR] publisher: WeMessenger FAIL #472185: sendMessage HTTP 403: {}
+2026-11-03 14:24:02 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:02 [ERROR] publisher: WeMessenger FAIL #472186: getAuthToken HTTP 403: 
+2026-11-03 14:24:02 [INFO] wemessenger: WeMessenger send text (493 chars)
+2026-11-03 14:24:02 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:02 [ERROR] publisher: WeMessenger FAIL #472193: sendMessage HTTP 403: {}
+2026-11-03 14:24:02 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:02 [ERROR] publisher: WeMessenger FAIL #472194: getAuthToken HTTP 403: 
+2026-11-03 14:24:02 [INFO] wemessenger: WeMessenger send text (141 chars)
+2026-11-03 14:24:03 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:03 [ERROR] publisher: WeMessenger FAIL #472195: sendMessage HTTP 403: {}
+2026-11-03 14:24:03 [INFO] wemessenger: WeMessenger send text (173 chars)
+2026-11-03 14:24:03 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:03 [ERROR] publisher: WeMessenger FAIL #472196: sendMessage HTTP 403: {}
+2026-11-03 14:24:03 [INFO] wemessenger: WeMessenger send text (231 chars)
+2026-11-03 14:24:03 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:03 [ERROR] publisher: WeMessenger FAIL #472197: sendMessage HTTP 403: {}
+2026-11-03 14:24:04 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:04 [ERROR] publisher: WeMessenger FAIL #472198: getAuthToken HTTP 403: 
+2026-11-03 14:24:04 [INFO] wemessenger: WeMessenger send text (31 chars)
+2026-11-03 14:24:04 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:04 [ERROR] publisher: WeMessenger FAIL #472199: sendMessage HTTP 403: {}
+2026-11-03 14:24:04 [INFO] wemessenger: WeMessenger send text (276 chars)
+2026-11-03 14:24:04 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:04 [ERROR] publisher: WeMessenger FAIL #472200: sendMessage HTTP 403: {}
+2026-11-03 14:24:04 [INFO] wemessenger: WeMessenger send text (258 chars)
+2026-11-03 14:24:05 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:05 [ERROR] publisher: WeMessenger FAIL #472201: sendMessage HTTP 403: {}
+2026-11-03 14:24:06 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:06 [ERROR] publisher: WeMessenger FAIL #472202: getAuthToken HTTP 403: 
+2026-11-03 14:24:06 [INFO] wemessenger: WeMessenger send text (708 chars)
+2026-11-03 14:24:06 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:06 [ERROR] publisher: WeMessenger FAIL #472203: sendMessage HTTP 403: {}
+2026-11-03 14:24:06 [INFO] wemessenger: WeMessenger send text (256 chars)
+2026-11-03 14:24:06 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:06 [ERROR] publisher: WeMessenger FAIL #472204: sendMessage HTTP 403: {}
+2026-11-03 14:24:06 [INFO] wemessenger: WeMessenger send text (168 chars)
+2026-11-03 14:24:07 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:07 [ERROR] publisher: WeMessenger FAIL #472205: sendMessage HTTP 403: {}
+2026-11-03 14:24:07 [INFO] wemessenger: WeMessenger send text (258 chars)
+2026-11-03 14:24:07 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:07 [ERROR] publisher: WeMessenger FAIL #472206: sendMessage HTTP 403: {}
+2026-11-03 14:24:07 [INFO] wemessenger: WeMessenger send text (176 chars)
+2026-11-03 14:24:07 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:07 [ERROR] publisher: WeMessenger FAIL #472208: sendMessage HTTP 403: {}
+2026-11-03 14:24:07 [INFO] wemessenger: WeMessenger send text (259 chars)
+2026-11-03 14:24:07 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:07 [ERROR] publisher: WeMessenger FAIL #472209: sendMessage HTTP 403: {}
+2026-11-03 14:24:08 [INFO] wemessenger: WeMessenger send text (508 chars)
+2026-11-03 14:24:08 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:08 [ERROR] publisher: WeMessenger FAIL #472211: sendMessage HTTP 403: {}
+2026-11-03 14:24:08 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:08 [ERROR] publisher: WeMessenger FAIL #472213: getAuthToken HTTP 403: 
+2026-11-03 14:24:08 [INFO] wemessenger: WeMessenger send text (146 chars)
+2026-11-03 14:24:08 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:08 [ERROR] publisher: WeMessenger FAIL #472214: sendMessage HTTP 403: {}
+2026-11-03 14:24:08 [INFO] wemessenger: WeMessenger send text (261 chars)
+2026-11-03 14:24:09 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:09 [ERROR] publisher: WeMessenger FAIL #472215: sendMessage HTTP 403: {}
+2026-11-03 14:24:09 [INFO] wemessenger: WeMessenger send text (255 chars)
+2026-11-03 14:24:09 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:09 [ERROR] publisher: WeMessenger FAIL #472216: sendMessage HTTP 403: {}
+2026-11-03 14:24:09 [INFO] wemessenger: WeMessenger send text (235 chars)
+2026-11-03 14:24:09 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:09 [ERROR] publisher: WeMessenger FAIL #472217: sendMessage HTTP 403: {}
+2026-11-03 14:24:09 [INFO] wemessenger: WeMessenger send text (257 chars)
+2026-11-03 14:24:10 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:10 [ERROR] publisher: WeMessenger FAIL #472218: sendMessage HTTP 403: {}
+2026-11-03 14:24:10 [INFO] wemessenger: WeMessenger send text (256 chars)
+2026-11-03 14:24:10 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:10 [ERROR] publisher: WeMessenger FAIL #472219: sendMessage HTTP 403: {}
+2026-11-03 14:24:10 [INFO] wemessenger: WeMessenger send text (258 chars)
+2026-11-03 14:24:10 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:10 [ERROR] publisher: WeMessenger FAIL #472220: sendMessage HTTP 403: {}
+2026-11-03 14:24:10 [INFO] wemessenger: WeMessenger send text (154 chars)
+2026-11-03 14:24:11 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:11 [ERROR] publisher: WeMessenger FAIL #472221: sendMessage HTTP 403: {}
+2026-11-03 14:24:11 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:11 [ERROR] publisher: WeMessenger FAIL #472222: getAuthToken HTTP 403: 
+2026-11-03 14:24:11 [INFO] wemessenger: WeMessenger send text (97 chars)
+2026-11-03 14:24:11 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:11 [ERROR] publisher: WeMessenger FAIL #472227: sendMessage HTTP 403: {}
+2026-11-03 14:24:11 [INFO] wemessenger: WeMessenger send text (532 chars)
+2026-11-03 14:24:12 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:12 [ERROR] publisher: WeMessenger FAIL #472228: sendMessage HTTP 403: {}
+2026-11-03 14:24:12 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:12 [ERROR] publisher: WeMessenger FAIL #472229: getAuthToken HTTP 403: 
+2026-11-03 14:24:12 [INFO] wemessenger: WeMessenger send text (1039 chars)
+2026-11-03 14:24:12 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:12 [ERROR] publisher: WeMessenger FAIL #472230: sendMessage HTTP 403: {}
+2026-11-03 14:24:13 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:13 [ERROR] publisher: WeMessenger FAIL #472231: getAuthToken HTTP 403: 
+2026-11-03 14:24:13 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:13 [ERROR] publisher: WeMessenger FAIL #472232: getAuthToken HTTP 403: 
+2026-11-03 14:24:13 [INFO] wemessenger: WeMessenger send text (256 chars)
+2026-11-03 14:24:13 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:13 [ERROR] publisher: WeMessenger FAIL #472233: sendMessage HTTP 403: {}
+2026-11-03 14:24:14 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:14 [ERROR] publisher: WeMessenger FAIL #472234: getAuthToken HTTP 403: 
+2026-11-03 14:24:14 [INFO] wemessenger: WeMessenger send text (282 chars)
+2026-11-03 14:24:14 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:14 [ERROR] publisher: WeMessenger FAIL #472235: sendMessage HTTP 403: {}
+2026-11-03 14:24:14 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:14 [ERROR] publisher: WeMessenger FAIL #472236: getAuthToken HTTP 403: 
+2026-11-03 14:24:14 [INFO] wemessenger: WeMessenger send text (258 chars)
+2026-11-03 14:24:15 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:15 [ERROR] publisher: WeMessenger FAIL #472237: sendMessage HTTP 403: {}
+2026-11-03 14:24:15 [INFO] publisher: queue after publish: unpublished=51 pending=0 failed=51 sent=0
+2026-11-03 14:24:15 [INFO] __main__: published 0/51 post(s) from @Farsna
+2026-11-03 14:24:16 [INFO] httpx: HTTP Request: GET https://t.me/s/Farsna "HTTP/1.1 200 OK"
+2026-11-03 14:24:30 [INFO] httpx: HTTP Request: GET https://api.wemessenger.ir/ "HTTP/1.1 404 Not Found"
+2026-11-03 14:24:30 [INFO] publisher: unpublished queue: 51 (pending=0, failed=51)
+2026-11-03 14:24:30 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:30 [ERROR] publisher: WeMessenger FAIL #472168: getAuthToken HTTP 403: 
+2026-11-03 14:24:30 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:30 [ERROR] publisher: WeMessenger FAIL #472169: getAuthToken HTTP 403: 
+2026-11-03 14:24:30 [INFO] wemessenger: WeMessenger send text (842 chars)
+2026-11-03 14:24:31 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:31 [ERROR] publisher: WeMessenger FAIL #472170: sendMessage HTTP 403: {}
+2026-11-03 14:24:31 [INFO] wemessenger: WeMessenger send text (62 chars)
+2026-11-03 14:24:31 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:31 [ERROR] publisher: WeMessenger FAIL #472171: sendMessage HTTP 403: {}
+2026-11-03 14:24:31 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:31 [ERROR] publisher: WeMessenger FAIL #472172: getAuthToken HTTP 403: 
+2026-11-03 14:24:31 [INFO] wemessenger: WeMessenger send text (128 chars)
+2026-11-03 14:24:32 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:32 [ERROR] publisher: WeMessenger FAIL #472179: sendMessage HTTP 403: {}
+2026-11-03 14:24:32 [INFO] wemessenger: WeMessenger send text (128 chars)
+2026-11-03 14:24:32 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:32 [ERROR] publisher: WeMessenger FAIL #472180: sendMessage HTTP 403: {}
+2026-11-03 14:24:33 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:33 [ERROR] publisher: WeMessenger FAIL #472181: getAuthToken HTTP 403: 
+2026-11-03 14:24:33 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:33 [ERROR] publisher: WeMessenger FAIL #472182: getAuthToken HTTP 403: 
+2026-11-03 14:24:33 [INFO] wemessenger: WeMessenger send text (531 chars)
+2026-11-03 14:24:33 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:33 [ERROR] publisher: WeMessenger FAIL #472183: sendMessage HTTP 403: {}
+2026-11-03 14:24:33 [INFO] wemessenger: WeMessenger send text (217 chars)
+2026-11-03 14:24:33 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:33 [ERROR] publisher: WeMessenger FAIL #472184: sendMessage HTTP 403: {}
+2026-11-03 14:24:33 [INFO] wemessenger: WeMessenger send text (367 chars)
+2026-11-03 14:24:34 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:34 [ERROR] publisher: WeMessenger FAIL #472185: sendMessage HTTP 403: {}
+2026-11-03 14:24:34 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:34 [ERROR] publisher: WeMessenger FAIL #472186: getAuthToken HTTP 403: 
+2026-11-03 14:24:34 [INFO] wemessenger: WeMessenger send text (493 chars)
+2026-11-03 14:24:34 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:34 [ERROR] publisher: WeMessenger FAIL #472193: sendMessage HTTP 403: {}
+2026-11-03 14:24:35 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:35 [ERROR] publisher: WeMessenger FAIL #472194: getAuthToken HTTP 403: 
+2026-11-03 14:24:35 [INFO] wemessenger: WeMessenger send text (141 chars)
+2026-11-03 14:24:35 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:35 [ERROR] publisher: WeMessenger FAIL #472195: sendMessage HTTP 403: {}
+2026-11-03 14:24:35 [INFO] wemessenger: WeMessenger send text (173 chars)
+2026-11-03 14:24:35 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:35 [ERROR] publisher: WeMessenger FAIL #472196: sendMessage HTTP 403: {}
+2026-11-03 14:24:35 [INFO] wemessenger: WeMessenger send text (231 chars)
+2026-11-03 14:24:36 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:36 [ERROR] publisher: WeMessenger FAIL #472197: sendMessage HTTP 403: {}
+2026-11-03 14:24:36 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:36 [ERROR] publisher: WeMessenger FAIL #472198: getAuthToken HTTP 403: 
+2026-11-03 14:24:36 [INFO] wemessenger: WeMessenger send text (31 chars)
+2026-11-03 14:24:36 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:36 [ERROR] publisher: WeMessenger FAIL #472199: sendMessage HTTP 403: {}
+2026-11-03 14:24:36 [INFO] wemessenger: WeMessenger send text (276 chars)
+2026-11-03 14:24:37 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:37 [ERROR] publisher: WeMessenger FAIL #472200: sendMessage HTTP 403: {}
+2026-11-03 14:24:37 [INFO] wemessenger: WeMessenger send text (258 chars)
+2026-11-03 14:24:37 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:37 [ERROR] publisher: WeMessenger FAIL #472201: sendMessage HTTP 403: {}
+2026-11-03 14:24:37 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:37 [ERROR] publisher: WeMessenger FAIL #472202: getAuthToken HTTP 403: 
+2026-11-03 14:24:37 [INFO] wemessenger: WeMessenger send text (708 chars)
+2026-11-03 14:24:38 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:38 [ERROR] publisher: WeMessenger FAIL #472203: sendMessage HTTP 403: {}
+2026-11-03 14:24:38 [INFO] wemessenger: WeMessenger send text (256 chars)
+2026-11-03 14:24:38 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:38 [ERROR] publisher: WeMessenger FAIL #472204: sendMessage HTTP 403: {}
+2026-11-03 14:24:38 [INFO] wemessenger: WeMessenger send text (168 chars)
+2026-11-03 14:24:38 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:38 [ERROR] publisher: WeMessenger FAIL #472205: sendMessage HTTP 403: {}
+2026-11-03 14:24:38 [INFO] wemessenger: WeMessenger send text (258 chars)
+2026-11-03 14:24:39 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:39 [ERROR] publisher: WeMessenger FAIL #472206: sendMessage HTTP 403: {}
+2026-11-03 14:24:39 [INFO] wemessenger: WeMessenger send text (176 chars)
+2026-11-03 14:24:39 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:39 [ERROR] publisher: WeMessenger FAIL #472208: sendMessage HTTP 403: {}
+2026-11-03 14:24:39 [INFO] wemessenger: WeMessenger send text (259 chars)
+2026-11-03 14:24:40 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:40 [ERROR] publisher: WeMessenger FAIL #472209: sendMessage HTTP 403: {}
+2026-11-03 14:24:40 [INFO] wemessenger: WeMessenger send text (508 chars)
+2026-11-03 14:24:40 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:40 [ERROR] publisher: WeMessenger FAIL #472211: sendMessage HTTP 403: {}
+2026-11-03 14:24:41 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:41 [ERROR] publisher: WeMessenger FAIL #472213: getAuthToken HTTP 403: 
+2026-11-03 14:24:41 [INFO] wemessenger: WeMessenger send text (146 chars)
+2026-11-03 14:24:41 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:41 [ERROR] publisher: WeMessenger FAIL #472214: sendMessage HTTP 403: {}
+2026-11-03 14:24:41 [INFO] wemessenger: WeMessenger send text (261 chars)
+2026-11-03 14:24:41 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:41 [ERROR] publisher: WeMessenger FAIL #472215: sendMessage HTTP 403: {}
+2026-11-03 14:24:41 [INFO] wemessenger: WeMessenger send text (255 chars)
+2026-11-03 14:24:42 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:42 [ERROR] publisher: WeMessenger FAIL #472216: sendMessage HTTP 403: {}
+2026-11-03 14:24:42 [INFO] wemessenger: WeMessenger send text (235 chars)
+2026-11-03 14:24:42 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:42 [ERROR] publisher: WeMessenger FAIL #472217: sendMessage HTTP 403: {}
+2026-11-03 14:24:42 [INFO] wemessenger: WeMessenger send text (257 chars)
+2026-11-03 14:24:42 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:42 [ERROR] publisher: WeMessenger FAIL #472218: sendMessage HTTP 403: {}
+2026-11-03 14:24:42 [INFO] wemessenger: WeMessenger send text (256 chars)
+2026-11-03 14:24:43 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:43 [ERROR] publisher: WeMessenger FAIL #472219: sendMessage HTTP 403: {}
+2026-11-03 14:24:43 [INFO] wemessenger: WeMessenger send text (258 chars)
+2026-11-03 14:24:43 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:43 [ERROR] publisher: WeMessenger FAIL #472220: sendMessage HTTP 403: {}
+2026-11-03 14:24:43 [INFO] wemessenger: WeMessenger send text (154 chars)
+2026-11-03 14:24:43 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:43 [ERROR] publisher: WeMessenger FAIL #472221: sendMessage HTTP 403: {}
+2026-11-03 14:24:43 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:43 [ERROR] publisher: WeMessenger FAIL #472222: getAuthToken HTTP 403: 
+2026-11-03 14:24:44 [INFO] wemessenger: WeMessenger send text (97 chars)
+2026-11-03 14:24:44 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:44 [ERROR] publisher: WeMessenger FAIL #472227: sendMessage HTTP 403: {}
+2026-11-03 14:24:44 [INFO] wemessenger: WeMessenger send text (532 chars)
+2026-11-03 14:24:44 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:44 [ERROR] publisher: WeMessenger FAIL #472228: sendMessage HTTP 403: {}
+2026-11-03 14:24:44 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:44 [ERROR] publisher: WeMessenger FAIL #472229: getAuthToken HTTP 403: 
+2026-11-03 14:24:44 [INFO] wemessenger: WeMessenger send text (1039 chars)
+2026-11-03 14:24:45 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:45 [ERROR] publisher: WeMessenger FAIL #472230: sendMessage HTTP 403: {}
+2026-11-03 14:24:45 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:45 [ERROR] publisher: WeMessenger FAIL #472231: getAuthToken HTTP 403: 
+2026-11-03 14:24:45 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:45 [ERROR] publisher: WeMessenger FAIL #472232: getAuthToken HTTP 403: 
+2026-11-03 14:24:45 [INFO] wemessenger: WeMessenger send text (256 chars)
+2026-11-03 14:24:46 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:46 [ERROR] publisher: WeMessenger FAIL #472233: sendMessage HTTP 403: {}
+2026-11-03 14:24:46 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:46 [ERROR] publisher: WeMessenger FAIL #472234: getAuthToken HTTP 403: 
+2026-11-03 14:24:46 [INFO] wemessenger: WeMessenger send text (282 chars)
+2026-11-03 14:24:46 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:46 [ERROR] publisher: WeMessenger FAIL #472235: sendMessage HTTP 403: {}
+2026-11-03 14:24:47 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:47 [ERROR] publisher: WeMessenger FAIL #472236: getAuthToken HTTP 403: 
+2026-11-03 14:24:47 [INFO] wemessenger: WeMessenger send text (258 chars)
+2026-11-03 14:24:47 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:24:47 [ERROR] publisher: WeMessenger FAIL #472237: sendMessage HTTP 403: {}
+2026-11-03 14:24:47 [INFO] publisher: queue after publish: unpublished=51 pending=0 failed=51 sent=0
+2026-11-03 14:24:47 [INFO] __main__: published 0/51 post(s) from @Farsna
+2026-11-03 14:24:48 [INFO] httpx: HTTP Request: GET https://t.me/s/Farsna "HTTP/1.1 200 OK"
+2026-11-03 14:25:02 [INFO] httpx: HTTP Request: GET https://api.wemessenger.ir/ "HTTP/1.1 404 Not Found"
+2026-11-03 14:25:02 [INFO] publisher: unpublished queue: 51 (pending=0, failed=51)
+2026-11-03 14:25:02 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:25:02 [ERROR] publisher: WeMessenger FAIL #472168: getAuthToken HTTP 403: 
+2026-11-03 14:25:03 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:25:03 [ERROR] publisher: WeMessenger FAIL #472169: getAuthToken HTTP 403: 
+2026-11-03 14:25:03 [INFO] wemessenger: WeMessenger send text (842 chars)
+2026-11-03 14:25:03 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:25:03 [ERROR] publisher: WeMessenger FAIL #472170: sendMessage HTTP 403: {}
+2026-11-03 14:25:03 [INFO] wemessenger: WeMessenger send text (62 chars)
+2026-11-03 14:25:03 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:25:03 [ERROR] publisher: WeMessenger FAIL #472171: sendMessage HTTP 403: {}
+2026-11-03 14:25:04 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:25:04 [ERROR] publisher: WeMessenger FAIL #472172: getAuthToken HTTP 403: 
+2026-11-03 14:25:04 [INFO] wemessenger: WeMessenger send text (128 chars)
+2026-11-03 14:25:04 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:25:04 [ERROR] publisher: WeMessenger FAIL #472179: sendMessage HTTP 403: {}
+2026-11-03 14:25:04 [INFO] wemessenger: WeMessenger send text (128 chars)
+2026-11-03 14:25:05 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:25:05 [ERROR] publisher: WeMessenger FAIL #472180: sendMessage HTTP 403: {}
+2026-11-03 14:25:05 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:25:05 [ERROR] publisher: WeMessenger FAIL #472181: getAuthToken HTTP 403: 
+2026-11-03 14:25:05 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:25:05 [ERROR] publisher: WeMessenger FAIL #472182: getAuthToken HTTP 403: 
+2026-11-03 14:25:05 [INFO] wemessenger: WeMessenger send text (531 chars)
+2026-11-03 14:25:05 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:25:05 [ERROR] publisher: WeMessenger FAIL #472183: sendMessage HTTP 403: {}
+2026-11-03 14:25:05 [INFO] wemessenger: WeMessenger send text (217 chars)
+2026-11-03 14:25:06 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:25:06 [ERROR] publisher: WeMessenger FAIL #472184: sendMessage HTTP 403: {}
+2026-11-03 14:25:06 [INFO] wemessenger: WeMessenger send text (367 chars)
+2026-11-03 14:25:06 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:25:06 [ERROR] publisher: WeMessenger FAIL #472185: sendMessage HTTP 403: {}
+2026-11-03 14:25:07 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:25:07 [ERROR] publisher: WeMessenger FAIL #472186: getAuthToken HTTP 403: 
+2026-11-03 14:25:07 [INFO] wemessenger: WeMessenger send text (493 chars)
+2026-11-03 14:25:07 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:25:07 [ERROR] publisher: WeMessenger FAIL #472193: sendMessage HTTP 403: {}
+2026-11-03 14:25:07 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:25:07 [ERROR] publisher: WeMessenger FAIL #472194: getAuthToken HTTP 403: 
+2026-11-03 14:25:07 [INFO] wemessenger: WeMessenger send text (141 chars)
+2026-11-03 14:25:08 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:25:08 [ERROR] publisher: WeMessenger FAIL #472195: sendMessage HTTP 403: {}
+2026-11-03 14:25:08 [INFO] wemessenger: WeMessenger send text (173 chars)
+2026-11-03 14:25:08 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:25:08 [ERROR] publisher: WeMessenger FAIL #472196: sendMessage HTTP 403: {}
+2026-11-03 14:25:08 [INFO] wemessenger: WeMessenger send text (231 chars)
+2026-11-03 14:25:08 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:25:08 [ERROR] publisher: WeMessenger FAIL #472197: sendMessage HTTP 403: {}
+2026-11-03 14:25:09 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:25:09 [ERROR] publisher: WeMessenger FAIL #472198: getAuthToken HTTP 403: 
+2026-11-03 14:25:09 [INFO] wemessenger: WeMessenger send text (31 chars)
+2026-11-03 14:25:09 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:25:09 [ERROR] publisher: WeMessenger FAIL #472199: sendMessage HTTP 403: {}
+2026-11-03 14:25:09 [INFO] wemessenger: WeMessenger send text (276 chars)
+2026-11-03 14:25:09 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:25:09 [ERROR] publisher: WeMessenger FAIL #472200: sendMessage HTTP 403: {}
+2026-11-03 14:25:09 [INFO] wemessenger: WeMessenger send text (258 chars)
+2026-11-03 14:25:10 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/sendMessage "HTTP/1.1 403 Forbidden"
+2026-11-03 14:25:10 [ERROR] publisher: WeMessenger FAIL #472201: sendMessage HTTP 403: {}
+2026-11-03 14:25:10 [INFO] httpx: HTTP Request: POST https://api.wemessenger.ir/v2/PASTE_BOT_TOKEN/getAuthToken "HTTP/1.1 403 Forbidden"
+2026-11-03 14:25:10 [ERROR] __main__: publish failed for @Farsna
+Traceback (most recent call last):
+  File "/home/ut/tg_scrapper_we/src/publisher.py", line 74, in publish_posts_to_wemessenger
+    client.send_post(text=text, photos=photos)
+  File "/home/ut/tg_scrapper_we/src/wemessenger.py", line 231, in send_post
+    self.send_image(
+  File "/home/ut/tg_scrapper_we/src/wemessenger.py", line 170, in send_image
+    uploaded = self.upload_file(
+               ^^^^^^^^^^^^^^^^^
+  File "/home/ut/tg_scrapper_we/src/wemessenger.py", line 113, in upload_file
+    jwt = self.get_auth_token(client)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ut/tg_scrapper_we/src/wemessenger.py", line 95, in get_auth_token
+    raise RuntimeError(
+RuntimeError: getAuthToken HTTP 403: 
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/ut/tg_scrapper_we/src/main.py", line 101, in main
+    sent, pending = publish_pending_to_wemessenger(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ut/tg_scrapper_we/src/publisher.py", line 147, in publish_pending_to_wemessenger
+    sent = publish_posts_to_wemessenger(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ut/tg_scrapper_we/src/publisher.py", line 76, in publish_posts_to_wemessenger
+    db.mark_delivery(
+  File "/home/ut/tg_scrapper_we/src/db.py", line 306, in mark_delivery
+    self.conn.execute(
+sqlite3.OperationalError: attempt to write a readonly database
+2026-11-03 14:25:20 [INFO] httpx: HTTP Request: GET https://t.me/s/Farsna "HTTP/1.1 200 OK"
+2026-11-03 14:25:20 [INFO] httpx: HTTP Request: GET https://t.me/s/Farsna?before=472218 "HTTP/1.1 200 OK"
+2026-11-03 14:25:21 [INFO] httpx: HTTP Request: GET https://t.me/s/Farsna?before=472196 "HTTP/1.1 200 OK"
+2026-11-03 14:25:22 [INFO] httpx: HTTP Request: GET https://t.me/s/Farsna?before=472172 "HTTP/1.1 200 OK"
+2026-11-03 14:25:22 [INFO] httpx: HTTP Request: GET https://t.me/s/Farsna?before=472152 "HTTP/1.1 200 OK"
+2026-11-03 14:25:23 [INFO] httpx: HTTP Request: GET https://t.me/s/Farsna?before=472124 "HTTP/1.1 200 OK"
+2026-11-03 14:25:23 [INFO] httpx: HTTP Request: GET https://t.me/s/Farsna?before=472103 "HTTP/1.1 200 OK"
+2026-11-03 14:25:24 [INFO] httpx: HTTP Request: GET https://t.me/s/Farsna?before=472083 "HTTP/1.1 200 OK"
+2026-11-03 14:25:25 [INFO] httpx: HTTP Request: GET https://t.me/s/Farsna?before=472063 "HTTP/1.1 200 OK"
+2026-11-03 14:25:25 [INFO] httpx: HTTP Request: GET https://t.me/s/Farsna?before=472043 "HTTP/1.1 200 OK"
+2026-11-03 14:25:26 [INFO] httpx: HTTP Request: GET https://t.me/s/Farsna?before=472022 "HTTP/1.1 200 OK"
+2026-11-03 14:25:26 [INFO] httpx: HTTP Request: GET https://t.me/s/Farsna?before=472002 "HTTP/1.1 200 OK"
+2026-11-03 14:25:27 [INFO] httpx: HTTP Request: GET https://t.me/s/Farsna?before=471982 "HTTP/1.1 200 OK"
+2026-11-03 14:25:28 [INFO] httpx: HTTP Request: GET https://t.me/s/Farsna?before=471961 "HTTP/1.1 200 OK"
+2026-11-03 14:25:28 [INFO] httpx: HTTP Request: GET https://t.me/s/Farsna?before=471937 "HTTP/1.1 200 OK"
+2026-11-03 14:25:29 [INFO] httpx: HTTP Request: GET https://t.me/s/Farsna?before=471914 "HTTP/1.1 200 OK"
+2026-11-03 14:25:29 [INFO] httpx: HTTP Request: GET https://t.me/s/Farsna?before=471889 "HTTP/1.1 200 OK"
+2026-11-03 14:25:30 [INFO] httpx: HTTP Request: GET https://t.me/s/Farsna?before=471866 "HTTP/1.1 200 OK"
+2026-11-03 14:25:30 [INFO] httpx: HTTP Request: GET https://t.me/s/Farsna?before=471845 "HTTP/1.1 200 OK"
+2026-11-03 14:25:31 [INFO] httpx: HTTP Request: GET https://t.me/s/Farsna?before=471825 "HTTP/1.1 200 OK"
+2026-11-03 14:25:32 [INFO] httpx: HTTP Request: GET https://t.me/s/Farsna?before=471805 "HTTP/1.1 200 OK"
+2026-11-03 14:25:33 [INFO] httpx: HTTP Request: GET https://t.me/s/Farsna?before=471781 "HTTP/1.1 200 OK"
+2026-11-03 14:25:33 [INFO] httpx: HTTP Request: GET https://t.me/s/Farsna?before=471760 "HTTP/1.1 200 OK"
+2026-11-03 14:25:34 [INFO] httpx: HTTP Request: GET https://t.me/s/Farsna?before=471737 "HTTP/1.1 200 OK"
+2026-11-03 14:25:34 [INFO] httpx: HTTP Request: GET https://t.me/s/Farsna?before=471717 "HTTP/1.1 200 OK"
+2026-11-03 14:25:35 [INFO] httpx: HTTP Request: GET https://t.me/s/Farsna?before=471697 "HTTP/1.1 200 OK"
+2026-11-03 14:25:36 [INFO] httpx: HTTP Request: GET https://t.me/s/Farsna?before=471675 "HTTP/1.1 200 OK"
+2026-11-03 14:25:36 [INFO] httpx: HTTP Request: GET https://t.me/s/Farsna?before=471654 "HTTP/1.1 200 OK"
+2026-11-03 14:25:37 [INFO] httpx: HTTP Request: GET https://t.me/s/Farsna?before=471634 "HTTP/1.1 200 OK"
+2026-11-03 14:25:37 [INFO] httpx: HTTP Request: GET https://t.me/s/Farsna?before=471613 "HTTP/1.1 200 OK"
+2026-11-03 14:25:38 [INFO] httpx: HTTP Request: GET https://t.me/s/Farsna?before=471588 "HTTP/1.1 200 OK"
+2026-11-03 14:25:39 [INFO] httpx: HTTP Request: GET https://t.me/s/Farsna?before=471563 "HTTP/1.1 200 OK"
+2026-11-03 14:25:40 [INFO] httpx: HTTP Request: GET https://t.me/s/Farsna?before=471543 "HTTP/1.1 200 OK"
+2026-11-03 14:25:40 [INFO] httpx: HTTP Request: GET https://t.me/s/Farsna?before=471520 "HTTP/1.1 200 OK"
+2026-11-03 14:25:41 [INFO] httpx: HTTP Request: GET https://t.me/s/Farsna?before=471500 "HTTP/1.1 200 OK"
+2026-11-03 14:25:42 [INFO] httpx: HTTP Request: GET https://t.me/s/Farsna?before=471480 "HTTP/1.1 200 OK"
+2026-11-03 14:25:42 [INFO] httpx: HTTP Request: GET https://t.me/s/Farsna?before=471459 "HTTP/1.1 200 OK"
+2026-11-03 14:25:43 [INFO] httpx: HTTP Request: GET https://t.me/s/Farsna?before=471439 "HTTP/1.1 200 OK"
