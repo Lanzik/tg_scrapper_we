@@ -63,6 +63,30 @@ def _parse_channel_routes(data: dict) -> list[dict]:
         seen.add(username.lower())
 
         route = {"telegram": channel, "username": username, "wemessenger_node": node}
+        raw_footer_tag = (
+            entry.get("footer_tag", data.get("footer_tag", "")) if isinstance(entry, dict)
+            else data.get("footer_tag", "")
+        )
+        route["footer_tag"] = str(raw_footer_tag or "").strip()
+
+        trailing_phrases = (
+            entry.get("remove_trailing_phrases", data.get("remove_trailing_phrases", []))
+            if isinstance(entry, dict)
+            else data.get("remove_trailing_phrases", [])
+        )
+        if isinstance(trailing_phrases, str):
+            trailing_phrases = [trailing_phrases]
+        if not isinstance(trailing_phrases, list):
+            raise SystemExit(f"`remove_trailing_phrases` for {channel} must be a list or string.")
+        route["remove_trailing_phrases"] = [
+            str(phrase).strip() for phrase in trailing_phrases if str(phrase).strip()
+        ]
+        route["remove_trailing_urls"] = bool(
+            entry.get("remove_trailing_urls", data.get("remove_trailing_urls", False))
+            if isinstance(entry, dict)
+            else data.get("remove_trailing_urls", False)
+        )
+
         for key, default in defaults.items():
             raw_value = entry.get(key, default) if isinstance(entry, dict) else default
             try:

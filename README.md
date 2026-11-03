@@ -25,6 +25,8 @@ channels:
 
 `poll_interval_seconds` is the pause between Telegram checks. `publish_interval_seconds` is the pause between attempts to drain that source's queue. `send_delay_seconds` is the pause between messages in a publishing batch. `retention_days` deletes posts older than that many days, measured from when they were scraped; set it to `0` to keep data indefinitely. Deleting a post also deletes its photos and queue rows.
 
+Each channel can set `footer_tag` to ensure its tag appears once on a separate final line. `remove_trailing_phrases` removes configured labels such as `Link` only from trailing lines, and `remove_trailing_urls: true` removes URLs from the end of a post. These cleanup options can also be set globally as defaults.
+
 `download_media` enables media downloads, and `max_media_per_post` limits how many images or videos are downloaded and published from each Telegram post. The limit defaults to `1`; selection follows the media order in the Telegram post. Set a higher value to keep and publish more items. The old `download_photos` key is still accepted. Videos are stored as files and uploaded using WeMessenger's video media type.
 
 `deduplicate_posts: true` (default) skips posts whose normalized text has already been stored, including across configured Telegram channels. For posts with no text, the checker compares media type and URL. Duplicate posts are skipped before saving or queueing, so they are not published. Set it to `false` to disable the check.

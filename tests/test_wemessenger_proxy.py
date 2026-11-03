@@ -18,6 +18,7 @@ from db import Database
 from main import _cleanup_completed_media, _publisher_worker, _scraper_worker
 from publisher import publish_posts_to_wemessenger
 import publisher as publisher_module
+from text_clean import clean_post_text
 from wemessenger import WeMessengerClient
 from wm_client import build_wemessenger
 
@@ -42,6 +43,37 @@ class ScraperGuardTests(unittest.TestCase):
 
         with self.assertRaisesRegex(RuntimeError, "no channel content|challenge|bot"):
             _collect_posts(FakeClient(), "Khabar_Fouri", limit=10)
+
+    def test_channel_tag_is_preserved_as_final_line(self):
+        self.assertEqual(
+            clean_post_text("story\n@Source_Channel"),
+            "story\n@Source_Channel",
+        )
+        self.assertEqual(
+            clean_post_text("story @source", footer_tag="@Source"),
+            "story\n@Source",
+        )
+        self.assertEqual(
+            clean_post_text("story@source", footer_tag="@Source"),
+            "story\n@Source",
+        )
+
+    def test_configured_trailing_link_label_and_url_are_removed(self):
+        self.assertEqual(
+            clean_post_text(
+                "body text\nLink\nhttps://out.example/page",
+                remove_trailing_phrases=["Link"],
+                remove_trailing_urls=True,
+            ),
+            "body text",
+        )
+        self.assertEqual(
+            clean_post_text(
+                "Link is useful in this paragraph\nbody",
+                remove_trailing_phrases=["Link"],
+            ),
+            "Link is useful in this paragraph\nbody",
+        )
 
     def test_parser_limits_mixed_media_and_keeps_video_type(self):
         html = """
@@ -159,6 +191,9 @@ class ChannelRouteTests(unittest.TestCase):
                         "publish_interval_seconds": 25,
                         "send_delay_seconds": 3,
                         "retention_days": 14,
+                        "footer_tag": "@First",
+                        "remove_trailing_phrases": ["Link"],
+                        "remove_trailing_urls": True,
                     },
                     {"telegram": "@second", "wemessenger_node": "node-2"},
                 ],
@@ -188,6 +223,9 @@ class ChannelRouteTests(unittest.TestCase):
         self.assertEqual(first["publish_interval_seconds"], 25)
         self.assertEqual(first["send_delay_seconds"], 3)
         self.assertEqual(first["retention_days"], 14)
+        self.assertEqual(first["footer_tag"], "@First")
+        self.assertEqual(first["remove_trailing_phrases"], ["Link"])
+        self.assertTrue(first["remove_trailing_urls"])
         self.assertEqual(second["wemessenger_node"], "node-2")
         self.assertEqual(second["retention_days"], 60)
         self.assertEqual(settings["max_media_per_post"], 2)
@@ -239,6 +277,7 @@ class ChannelRouteTests(unittest.TestCase):
                 )
 
                 self.assertTrue(db.has_duplicate_post("breaking story now"))
+                self.assertTrue(db.has_duplicate_post("breaking story now\n@second"))
                 self.assertFalse(db.has_duplicate_post("a different post"))
 
     def test_existing_posts_get_fingerprints_backfilled_on_open(self):

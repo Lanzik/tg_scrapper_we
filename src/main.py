@@ -98,6 +98,9 @@ def _publish_route(settings: dict, route: dict, target: str, client) -> None:
         target=target,
         source_channel=route["username"],
         delete_media_after_publish=settings["delete_media_after_publish"],
+        footer_tag=route["footer_tag"],
+        remove_trailing_phrases=route["remove_trailing_phrases"],
+        remove_trailing_urls=route["remove_trailing_urls"],
     )
     if pending:
         logger.info("published %s/%s post(s) from %s", sent, pending, route["telegram"])

@@ -78,6 +78,7 @@ def _content_fingerprint(text: str, media: list[dict] | None = None) -> str | No
     )
     normalized_text = normalized_text.replace("\u200c", " ")
     normalized_text = re.sub(r"https?://\S+", " ", normalized_text)
+    normalized_text = re.sub(r"\s*@[^\s@]{4,}\s*$", "", normalized_text)
     normalized_text = " ".join(normalized_text.split())
     if normalized_text:
         content = {"text": normalized_text}

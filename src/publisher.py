@@ -67,6 +67,9 @@ def publish_posts_to_wemessenger(
     send_delay_seconds: int = 20,
     target: str = "wemessenger",
     delete_media_after_publish: bool = True,
+    footer_tag: str | None = None,
+    remove_trailing_phrases: list[str] | None = None,
+    remove_trailing_urls: bool = False,
 ) -> int:
     """Send posts to WeMessenger. Returns count successfully sent."""
     if not post_ids:
@@ -111,7 +114,12 @@ def publish_posts_to_wemessenger(
                 )
                 time.sleep(send_delay_seconds)
 
-            text = clean_post_text(post["text"] or "")
+            text = clean_post_text(
+                post["text"] or "",
+                footer_tag=footer_tag,
+                remove_trailing_phrases=remove_trailing_phrases or [],
+                remove_trailing_urls=remove_trailing_urls,
+            )
             media = _media_payloads(db, post_id)
             now = datetime.now(timezone.utc).isoformat()
 
@@ -172,6 +180,9 @@ def publish_pending_to_wemessenger(
     target: str = "wemessenger",
     source_channel: str | None = None,
     delete_media_after_publish: bool = True,
+    footer_tag: str | None = None,
+    remove_trailing_phrases: list[str] | None = None,
+    remove_trailing_urls: bool = False,
 ) -> tuple[int, int]:
     """Drain unpublished queue. Returns (sent, pending_before)."""
     with Database(database) as db:
@@ -200,5 +211,8 @@ def publish_pending_to_wemessenger(
         send_delay_seconds=send_delay_seconds,
         target=target,
         delete_media_after_publish=delete_media_after_publish,
+        footer_tag=footer_tag,
+        remove_trailing_phrases=remove_trailing_phrases,
+        remove_trailing_urls=remove_trailing_urls,
     )
     return sent, len(pending)
