@@ -4,6 +4,7 @@ channels:
     footer_tag: "@Khabar_Fouri"
     remove_trailing_phrases: ["Link"]
     remove_trailing_urls: true
+    exclude_post_terms: ["example"]
     poll_interval_seconds: 30
     publish_interval_seconds: 15
     send_delay_seconds: 20

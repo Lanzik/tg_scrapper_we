@@ -98,6 +98,7 @@ class ScraperGuardTests(unittest.TestCase):
         posts = [
             {"id": 1, "date": None, "text": "Same post text", "views": None, "media": []},
             {"id": 2, "date": None, "text": "  SAME   post text ", "views": None, "media": []},
+            {"id": 3, "date": None, "text": "An EXAMPLE story", "views": None, "media": []},
         ]
         fake_http_client = MagicMock()
         fake_http_client.__enter__.return_value = fake_http_client
@@ -111,6 +112,7 @@ class ScraperGuardTests(unittest.TestCase):
                     "@source",
                     database=database_path,
                     only_new=False,
+                    exclude_post_terms=["example"],
                 )
 
             self.assertEqual(len(saved), 1)
@@ -194,6 +196,7 @@ class ChannelRouteTests(unittest.TestCase):
                         "footer_tag": "@First",
                         "remove_trailing_phrases": ["Link"],
                         "remove_trailing_urls": True,
+                        "exclude_post_terms": ["example", "advertisement"],
                     },
                     {"telegram": "@second", "wemessenger_node": "node-2"},
                 ],
@@ -226,6 +229,7 @@ class ChannelRouteTests(unittest.TestCase):
         self.assertEqual(first["footer_tag"], "@First")
         self.assertEqual(first["remove_trailing_phrases"], ["Link"])
         self.assertTrue(first["remove_trailing_urls"])
+        self.assertEqual(first["exclude_post_terms"], ["example", "advertisement"])
         self.assertEqual(second["wemessenger_node"], "node-2")
         self.assertEqual(second["retention_days"], 60)
         self.assertEqual(settings["max_media_per_post"], 2)
@@ -382,6 +386,46 @@ class ChannelRouteTests(unittest.TestCase):
 
 
 class DuplicatePublishTests(unittest.TestCase):
+    def test_existing_filtered_term_is_not_published(self):
+        class FakePublisher:
+            def __init__(self):
+                self.posts = []
+
+            def send_post(self, **kwargs):
+                self.posts.append(kwargs)
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            database_path = Path(temp_dir) / "filtered.db"
+            with Database(database_path) as db:
+                channel_id = db.upsert_channel(
+                    "source", "Source", "https://t.me/s/source", "2020-01-01T00:00:00+00:00"
+                )
+                post_id = db.upsert_post(
+                    channel_id,
+                    message_id=1,
+                    date=None,
+                    text="This contains Example text",
+                    views=None,
+                    source="https://t.me/source/1",
+                    scraped_at="2020-01-01T00:00:00+00:00",
+                )
+                db.enqueue_for_publish(post_id, target="node")
+
+            publisher = FakePublisher()
+            sent = publish_posts_to_wemessenger(
+                database_path,
+                [post_id],
+                publisher,
+                target="node",
+                exclude_post_terms=["example"],
+            )
+
+            self.assertEqual(sent, 0)
+            self.assertEqual(publisher.posts, [])
+            with Database(database_path) as db:
+                self.assertEqual(db.count_queue("node")["filtered"], 1)
+                self.assertEqual(db.get_pending_delivery_post_ids("node"), [])
+
     def test_existing_duplicate_queue_publishes_only_first_copy(self):
         class FakePublisher:
             def __init__(self):

@@ -9,7 +9,7 @@ from pathlib import Path
 
 from config import ROOT_DIR
 from db import Database
-from text_clean import clean_post_text
+from text_clean import clean_post_text, contains_excluded_term
 from wemessenger import WeMessengerClient
 
 logger = logging.getLogger(__name__)
@@ -70,6 +70,7 @@ def publish_posts_to_wemessenger(
     footer_tag: str | None = None,
     remove_trailing_phrases: list[str] | None = None,
     remove_trailing_urls: bool = False,
+    exclude_post_terms: list[str] | None = None,
 ) -> int:
     """Send posts to WeMessenger. Returns count successfully sent."""
     if not post_ids:
@@ -85,6 +86,26 @@ def publish_posts_to_wemessenger(
         for index, post_id in enumerate(ordered):
             post = db.get_post(post_id)
             if post is None:
+                continue
+            excluded_term = contains_excluded_term(
+                post["text"] or "",
+                exclude_post_terms or [],
+            )
+            if excluded_term:
+                db.mark_delivery(
+                    post_id,
+                    target=target,
+                    status="filtered",
+                    sent_at=None,
+                    error=f"excluded by term {excluded_term!r}",
+                )
+                logger.info(
+                    "skip filtered telegram #%s (matched %r)",
+                    post["message_id"],
+                    excluded_term,
+                )
+                if delete_media_after_publish:
+                    _delete_saved_media(db, post_id)
                 continue
             duplicate_of = db.get_prior_duplicate_post_id(post_id)
             if duplicate_of is not None:
@@ -183,6 +204,7 @@ def publish_pending_to_wemessenger(
     footer_tag: str | None = None,
     remove_trailing_phrases: list[str] | None = None,
     remove_trailing_urls: bool = False,
+    exclude_post_terms: list[str] | None = None,
 ) -> tuple[int, int]:
     """Drain unpublished queue. Returns (sent, pending_before)."""
     with Database(database) as db:
@@ -214,5 +236,6 @@ def publish_pending_to_wemessenger(
         footer_tag=footer_tag,
         remove_trailing_phrases=remove_trailing_phrases,
         remove_trailing_urls=remove_trailing_urls,
+        exclude_post_terms=exclude_post_terms,
     )
     return sent, len(pending)

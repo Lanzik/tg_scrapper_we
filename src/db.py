@@ -554,7 +554,7 @@ class Database:
                 FROM posts p
                 WHERE EXISTS (
                     SELECT 1 FROM publish_queue q
-                    WHERE q.post_id = p.id AND q.status IN ('sent', 'duplicate')
+                    WHERE q.post_id = p.id AND q.status IN ('sent', 'duplicate', 'filtered')
                 )
                 AND NOT EXISTS (
                     SELECT 1 FROM publish_queue q
@@ -598,7 +598,7 @@ class Database:
             FROM posts p
             JOIN publish_queue q ON q.post_id = p.id
             JOIN photos m ON m.post_id = p.id
-            WHERE q.status IN ('sent', 'duplicate')
+            WHERE q.status IN ('sent', 'duplicate', 'filtered')
               AND NOT EXISTS (
                   SELECT 1 FROM publish_queue pending
                   WHERE pending.post_id = p.id

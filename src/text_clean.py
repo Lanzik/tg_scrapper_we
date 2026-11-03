@@ -3,12 +3,22 @@
 from __future__ import annotations
 
 import re
+import unicodedata
 
 # Telegram @username at end of post (channel branding)
 _HANDLE_LINE = re.compile(r"^@[\w\d_]{4,}$", re.UNICODE)
 # Trailing decoration-only lines (💡, 🔹, ---, etc.) with no real words
 _HAS_WORD = re.compile(r"[\w\u0600-\u06FF]", re.UNICODE)
 _URL = re.compile(r"https?://\S+", re.IGNORECASE)
+
+
+def contains_excluded_term(text: str, terms: list[str] | tuple[str, ...]) -> str | None:
+    normalized_text = unicodedata.normalize("NFKC", text or "").casefold()
+    for term in terms:
+        normalized_term = unicodedata.normalize("NFKC", str(term)).strip().casefold()
+        if normalized_term and normalized_term in normalized_text:
+            return str(term)
+    return None
 
 
 def clean_post_text(

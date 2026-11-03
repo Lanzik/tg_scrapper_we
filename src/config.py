@@ -86,6 +86,18 @@ def _parse_channel_routes(data: dict) -> list[dict]:
             if isinstance(entry, dict)
             else data.get("remove_trailing_urls", False)
         )
+        excluded_terms = (
+            entry.get("exclude_post_terms", data.get("exclude_post_terms", []))
+            if isinstance(entry, dict)
+            else data.get("exclude_post_terms", [])
+        )
+        if isinstance(excluded_terms, str):
+            excluded_terms = [excluded_terms]
+        if not isinstance(excluded_terms, list):
+            raise SystemExit(f"`exclude_post_terms` for {channel} must be a list or string.")
+        route["exclude_post_terms"] = [
+            str(term).strip() for term in excluded_terms if str(term).strip()
+        ]
 
         for key, default in defaults.items():
             raw_value = entry.get(key, default) if isinstance(entry, dict) else default

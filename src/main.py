@@ -29,6 +29,7 @@ def _scrape_route(settings: dict, route: dict, *, initial: bool, target: str) ->
         target=target,
         max_media_per_post=settings["max_media_per_post"],
         deduplicate_posts=settings["deduplicate_posts"],
+        exclude_post_terms=route["exclude_post_terms"],
     )
     if saved:
         logger.info("queued %s new post(s) from %s", len(saved), route["telegram"])
@@ -101,6 +102,7 @@ def _publish_route(settings: dict, route: dict, target: str, client) -> None:
         footer_tag=route["footer_tag"],
         remove_trailing_phrases=route["remove_trailing_phrases"],
         remove_trailing_urls=route["remove_trailing_urls"],
+        exclude_post_terms=route["exclude_post_terms"],
     )
     if pending:
         logger.info("published %s/%s post(s) from %s", sent, pending, route["telegram"])

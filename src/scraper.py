@@ -12,6 +12,7 @@ from bs4 import BeautifulSoup
 
 from config import DATA_DIR, USER_AGENT
 from db import Database
+from text_clean import contains_excluded_term
 
 PHOTO_URL_RE = re.compile(r"url\(['\"]?(https?://[^'\")\s]+)['\"]?\)")
 
@@ -328,6 +329,7 @@ def scrape_channel(
     target: str = "wemessenger",
     max_media_per_post: int = 1,
     deduplicate_posts: bool = True,
+    exclude_post_terms: list[str] | None = None,
 ) -> list[int]:
     """
     Scrape a *public* Telegram channel via https://t.me/s/<username>
@@ -383,6 +385,16 @@ def scrape_channel(
 
             for post in ordered:
                 if only_new and db.has_post(channel_id, post["id"]):
+                    continue
+                excluded_term = contains_excluded_term(
+                    post["text"] or "",
+                    exclude_post_terms or [],
+                )
+                if excluded_term:
+                    print(
+                        f"  skipped filtered #{post['id']} from @{username} "
+                        f"(matched {excluded_term!r})"
+                    )
                     continue
                 if deduplicate_posts and db.has_duplicate_post(
                     post["text"] or "",
