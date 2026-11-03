@@ -29,6 +29,18 @@ channels:
 
 `deduplicate_posts: true` (default) skips posts whose normalized text has already been stored, including across configured Telegram channels. For posts with no text, the checker compares media type and URL. Duplicate posts are skipped before saving or queueing, so they are not published. Set it to `false` to disable the check.
 
+`delete_media_after_publish: true` removes downloaded media files and DB media rows only after a successful WeMessenger send; failed posts retain media for retry. On startup, media for previously completed posts is cleaned up too.
+
+`max_database_size_gb` sets the SQLite size limit (default `5`). At startup and hourly, if the DB is over the limit, the app removes the oldest sent/duplicate posts in batches and vacuums SQLite. Pending and failed posts are never purged. If they alone keep the DB over the limit, the app logs an error instead of losing unpublished data. Per-channel retention follows the same protection.
+
+`log_max_mb` and `log_backup_count` configure rotating logs (defaults `5` MB and `5` backups, for about `30` MB total per log file). Old rotated logs are removed automatically.
+
+`delete_media_after_publish: true` removes a post's downloaded media files and DB media rows only after a successful WeMessenger send; failed posts keep their media for retry. On startup, previously sent/duplicate posts with remaining media are cleaned up too.
+
+`max_database_size_gb` sets the SQLite size limit (default `5`). At startup and hourly, if the DB is over the limit, the app removes the oldest sent/duplicate posts in batches and vacuums SQLite. Pending and failed posts are never purged; if they alone keep the DB over the limit, the app logs an error instead of losing unpublished data. Per-channel `retention_days` follows the same pending/failed protection.
+
+`log_max_mb` and `log_backup_count` configure rotating logs (defaults `5` MB and `5` backups, for about `30` MB total per log file). Old rotated logs are removed automatically.
+
 The shared WeMessenger bot token and API settings live under `wemessenger`. Proxy settings for scraping and publishing are independent. Legacy string channel lists and a single top-level `wemessenger.channel_node` remain supported.
 
 ## Run

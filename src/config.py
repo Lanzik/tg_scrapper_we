@@ -139,6 +139,21 @@ def load_settings(path: Path | None = None) -> dict:
     if max_media_per_post < 1:
         raise SystemExit("`max_media_per_post` must be >= 1.")
 
+    try:
+        max_database_size_gb = float(data.get("max_database_size_gb", 5))
+    except (TypeError, ValueError):
+        raise SystemExit("`max_database_size_gb` must be a positive number.")
+    if max_database_size_gb <= 0:
+        raise SystemExit("`max_database_size_gb` must be > 0.")
+
+    try:
+        log_max_mb = int(data.get("log_max_mb", 5))
+        log_backup_count = int(data.get("log_backup_count", 5))
+    except (TypeError, ValueError):
+        raise SystemExit("`log_max_mb` and `log_backup_count` must be integers.")
+    if log_max_mb < 1 or log_backup_count < 0:
+        raise SystemExit("`log_max_mb` must be >= 1 and `log_backup_count` >= 0.")
+
     db_raw = str(data.get("database") or "data/telegram.db").strip()
     db_path = Path(db_raw)
     if not db_path.is_absolute():
@@ -179,6 +194,10 @@ def load_settings(path: Path | None = None) -> dict:
         "send_delay_seconds": send_delay_seconds,
         "max_media_per_post": max_media_per_post,
         "deduplicate_posts": bool(data.get("deduplicate_posts", True)),
+        "delete_media_after_publish": bool(data.get("delete_media_after_publish", True)),
+        "max_database_size_gb": max_database_size_gb,
+        "log_max_mb": log_max_mb,
+        "log_backup_count": log_backup_count,
         "retention_days": int(data.get("retention_days", 0)),
         "telegram_proxy": telegram_proxy,
         "scraper_use_proxy": scraper_use_proxy,

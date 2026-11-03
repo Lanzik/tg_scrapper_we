@@ -32,6 +32,33 @@ def _media_payloads(db: Database, post_id: int) -> list[tuple[bytes, str, str]]:
     return media
 
 
+def _delete_saved_media(db: Database, post_id: int) -> None:
+    media_root = (ROOT_DIR / "data" / "media").resolve()
+    for stored_path in db.delete_post_media(post_id):
+        path = Path(stored_path)
+        if not path.is_absolute():
+            path = ROOT_DIR / path
+        path = path.resolve()
+        try:
+            path.relative_to(media_root)
+        except ValueError:
+            logger.warning("not deleting media outside data/media: %s", stored_path)
+            continue
+        try:
+            path.unlink(missing_ok=True)
+        except OSError as exc:
+            logger.warning("could not remove published media %s: %s", path, exc)
+            continue
+
+        parent = path.parent
+        while parent != media_root:
+            try:
+                parent.rmdir()
+            except OSError:
+                break
+            parent = parent.parent
+
+
 def publish_posts_to_wemessenger(
     database: Path,
     post_ids: list[int],
@@ -39,6 +66,7 @@ def publish_posts_to_wemessenger(
     *,
     send_delay_seconds: int = 20,
     target: str = "wemessenger",
+    delete_media_after_publish: bool = True,
 ) -> int:
     """Send posts to WeMessenger. Returns count successfully sent."""
     if not post_ids:
@@ -69,6 +97,8 @@ def publish_posts_to_wemessenger(
                     post["message_id"],
                     duplicate_of,
                 )
+                if delete_media_after_publish:
+                    _delete_saved_media(db, post_id)
                 continue
             if db.is_delivered(post_id, target=target):
                 logger.info("skip already sent telegram #%s", post["message_id"])
@@ -109,6 +139,8 @@ def publish_posts_to_wemessenger(
                 sent_at=now,
                 error=None,
             )
+            if delete_media_after_publish:
+                _delete_saved_media(db, post_id)
             sent += 1
             mode = f"{media[0][2]}+caption" if media else "text"
             preview = (text or "[media only]")[:60].replace("\n", " ")
@@ -139,6 +171,7 @@ def publish_pending_to_wemessenger(
     send_delay_seconds: int = 20,
     target: str = "wemessenger",
     source_channel: str | None = None,
+    delete_media_after_publish: bool = True,
 ) -> tuple[int, int]:
     """Drain unpublished queue. Returns (sent, pending_before)."""
     with Database(database) as db:
@@ -166,5 +199,6 @@ def publish_pending_to_wemessenger(
         client,
         send_delay_seconds=send_delay_seconds,
         target=target,
+        delete_media_after_publish=delete_media_after_publish,
     )
     return sent, len(pending)

@@ -17,6 +17,8 @@ limit: 50
 download_media: true
 max_media_per_post: 1
 deduplicate_posts: true
+delete_media_after_publish: true
+max_database_size_gb: 5
 database: data/telegram.db
 
 poll: true
@@ -27,6 +29,8 @@ retention_days: 0 # 0 disables automatic deletion
 
 log_file: logs/scrape.log
 log_level: INFO
+log_max_mb: 5
+log_backup_count: 5
 
 # Independent proxy toggles for each outbound path
 scraper_use_proxy: true

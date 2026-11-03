@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-import sqlite3
 import hashlib
 import json
 import re
+import sqlite3
 import unicodedata
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -508,17 +508,101 @@ class Database:
         self.conn.commit()
 
     def delete_channel_posts_older_than(self, username: str, days: int) -> int:
-        """Delete aged posts for one source channel; related rows cascade."""
+        """Delete aged delivered posts; never discard pending or failed items."""
         if days <= 0:
             return 0
         cutoff = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
         cursor = self.conn.execute(
             """
             DELETE FROM posts
-            WHERE channel_id = (SELECT id FROM channels WHERE username = ?)
-              AND scraped_at < ?
+                        WHERE channel_id = (SELECT id FROM channels WHERE username = ?)
+                            AND scraped_at < ?
+                            AND NOT EXISTS (
+                                    SELECT 1 FROM publish_queue q
+                                    WHERE q.post_id = posts.id AND q.status IN ('pending', 'failed')
+                            )
             """,
             (username, cutoff),
         )
         self.conn.commit()
         return cursor.rowcount
+
+    def database_size_bytes(self) -> int:
+        size = self.path.stat().st_size if self.path.exists() else 0
+        for suffix in ("-wal", "-shm"):
+            sidecar = Path(f"{self.path}{suffix}")
+            if sidecar.exists():
+                size += sidecar.stat().st_size
+        return size
+
+    def delete_oldest_published_until_size(
+        self,
+        max_bytes: int,
+        *,
+        batch_size: int = 250,
+    ) -> int:
+        """Purge oldest delivered/duplicate posts until the DB is under its cap."""
+        if max_bytes <= 0 or self.database_size_bytes() <= max_bytes:
+            return 0
+
+        deleted = 0
+        while self.database_size_bytes() > max_bytes:
+            rows = self.conn.execute(
+                """
+                SELECT p.id
+                FROM posts p
+                WHERE EXISTS (
+                    SELECT 1 FROM publish_queue q
+                    WHERE q.post_id = p.id AND q.status IN ('sent', 'duplicate')
+                )
+                AND NOT EXISTS (
+                    SELECT 1 FROM publish_queue q
+                    WHERE q.post_id = p.id AND q.status IN ('pending', 'failed')
+                )
+                ORDER BY p.scraped_at ASC, p.id ASC
+                LIMIT ?
+                """,
+                (batch_size,),
+            ).fetchall()
+            if not rows:
+                break
+
+            post_ids = [int(row["id"]) for row in rows]
+            placeholders = ",".join("?" for _ in post_ids)
+            cursor = self.conn.execute(
+                f"DELETE FROM posts WHERE id IN ({placeholders})",
+                post_ids,
+            )
+            self.conn.commit()
+            deleted += cursor.rowcount
+            self.conn.execute("VACUUM")
+
+        return deleted
+
+    def delete_post_media(self, post_id: int) -> list[str]:
+        """Remove saved media records and return their file paths for cleanup."""
+        rows = self.conn.execute(
+            "SELECT file_path FROM photos WHERE post_id = ? AND file_path IS NOT NULL",
+            (post_id,),
+        ).fetchall()
+        paths = [str(row["file_path"]) for row in rows]
+        self.conn.execute("DELETE FROM photos WHERE post_id = ?", (post_id,))
+        self.conn.commit()
+        return paths
+
+    def get_completed_post_ids_with_media(self) -> list[int]:
+        rows = self.conn.execute(
+            """
+            SELECT DISTINCT p.id
+            FROM posts p
+            JOIN publish_queue q ON q.post_id = p.id
+            JOIN photos m ON m.post_id = p.id
+            WHERE q.status IN ('sent', 'duplicate')
+              AND NOT EXISTS (
+                  SELECT 1 FROM publish_queue pending
+                  WHERE pending.post_id = p.id
+                    AND pending.status IN ('pending', 'failed')
+              )
+            """
+        ).fetchall()
+        return [int(row["id"]) for row in rows]

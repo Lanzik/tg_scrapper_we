@@ -15,8 +15,9 @@ sys.path.insert(0, str(ROOT / "src"))
 from scraper import _collect_posts, _parse_page, scrape_channel
 from config import load_settings
 from db import Database
-from main import _publisher_worker, _scraper_worker
+from main import _cleanup_completed_media, _publisher_worker, _scraper_worker
 from publisher import publish_posts_to_wemessenger
+import publisher as publisher_module
 from wemessenger import WeMessengerClient
 from wm_client import build_wemessenger
 
@@ -168,6 +169,10 @@ class ChannelRouteTests(unittest.TestCase):
                 "max_media_per_post": 2,
                 "download_media": False,
                 "deduplicate_posts": True,
+                "max_database_size_gb": 2,
+                "log_max_mb": 7,
+                "log_backup_count": 3,
+                "delete_media_after_publish": True,
                 "wemessenger": {"enabled": True, "bot_token": "token"},
             }
         )
@@ -188,6 +193,10 @@ class ChannelRouteTests(unittest.TestCase):
         self.assertEqual(settings["max_media_per_post"], 2)
         self.assertFalse(settings["download_media"])
         self.assertTrue(settings["deduplicate_posts"])
+        self.assertEqual(settings["max_database_size_gb"], 2)
+        self.assertEqual(settings["log_max_mb"], 7)
+        self.assertEqual(settings["log_backup_count"], 3)
+        self.assertTrue(settings["delete_media_after_publish"])
 
     def test_existing_photos_table_migrates_media_type(self):
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -254,6 +263,43 @@ class ChannelRouteTests(unittest.TestCase):
             with Database(database_path) as db:
                 self.assertTrue(db.has_duplicate_post("PREVIOUS post"))
 
+    def test_database_size_cleanup_removes_sent_but_preserves_pending(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            database_path = Path(temp_dir) / "size-limit.db"
+            with Database(database_path) as db:
+                channel_id = db.upsert_channel(
+                    "source", "Source", "https://t.me/s/source", "2020-01-01T00:00:00+00:00"
+                )
+                sent_id = db.upsert_post(
+                    channel_id,
+                    message_id=1,
+                    date=None,
+                    text="sent post " + ("x" * 200_000),
+                    views=None,
+                    source="https://t.me/source/1",
+                    scraped_at="2020-01-01T00:00:00+00:00",
+                )
+                db.enqueue_for_publish(sent_id, target="node")
+                db.mark_delivery(sent_id, target="node", status="sent")
+
+                pending_id = db.upsert_post(
+                    channel_id,
+                    message_id=2,
+                    date=None,
+                    text="pending post",
+                    views=None,
+                    source="https://t.me/source/2",
+                    scraped_at="2020-01-02T00:00:00+00:00",
+                )
+                db.enqueue_for_publish(pending_id, target="node")
+
+                deleted = db.delete_oldest_published_until_size(80_000)
+
+                self.assertEqual(deleted, 1)
+                self.assertIsNone(db.get_post(sent_id))
+                self.assertIsNotNone(db.get_post(pending_id))
+                self.assertLessEqual(db.database_size_bytes(), 80_000)
+
     def test_legacy_queue_is_routed_and_expired_posts_cascade(self):
         with tempfile.TemporaryDirectory() as temp_dir:
             with Database(Path(temp_dir) / "test.db") as db:
@@ -289,6 +335,8 @@ class ChannelRouteTests(unittest.TestCase):
                 self.assertEqual(
                     db.get_pending_delivery_post_ids("node-1", "second"), []
                 )
+                self.assertEqual(db.delete_channel_posts_older_than("first", 30), 0)
+                db.mark_delivery(post_id, target="node-1", status="sent")
                 self.assertEqual(db.delete_channel_posts_older_than("first", 30), 1)
                 self.assertIsNone(db.get_post(post_id))
                 self.assertEqual(db.count_queue("node-1")["unpublished"], 0)
@@ -341,6 +389,132 @@ class DuplicatePublishTests(unittest.TestCase):
             with Database(database_path) as db:
                 self.assertEqual(db.count_queue("node")["duplicate"], 1)
                 self.assertEqual(db.get_pending_delivery_post_ids("node"), [])
+
+    def test_published_media_is_deleted_but_failed_media_is_kept(self):
+        class FakePublisher:
+            def __init__(self, fail=False):
+                self.fail = fail
+
+            def send_post(self, **_kwargs):
+                if self.fail:
+                    raise RuntimeError("send failed")
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            media_path = root / "data/media/source/1/video.mp4"
+            media_path.parent.mkdir(parents=True)
+            media_path.write_bytes(b"video")
+            database_path = root / "queue.db"
+            with Database(database_path) as db:
+                channel_id = db.upsert_channel(
+                    "source", "Source", "https://t.me/s/source", "2020-01-01T00:00:00+00:00"
+                )
+                post_id = db.upsert_post(
+                    channel_id,
+                    message_id=1,
+                    date=None,
+                    text="caption",
+                    views=None,
+                    source="https://t.me/source/1",
+                    scraped_at="2020-01-01T00:00:00+00:00",
+                )
+                db.replace_photos(
+                    post_id,
+                    [{
+                        "position": 1,
+                        "file_path": "data/media/source/1/video.mp4",
+                        "media_type": "video",
+                    }],
+                )
+                db.enqueue_for_publish(post_id, target="node")
+
+            with patch.object(publisher_module, "ROOT_DIR", root):
+                sent = publish_posts_to_wemessenger(
+                    database_path,
+                    [post_id],
+                    FakePublisher(),
+                    send_delay_seconds=0,
+                    target="node",
+                )
+                self.assertEqual(sent, 1)
+                self.assertFalse(media_path.exists())
+                with Database(database_path) as db:
+                    self.assertEqual(db.get_photos(post_id), [])
+
+                media_path.parent.mkdir(parents=True, exist_ok=True)
+                media_path.write_bytes(b"video")
+                with Database(database_path) as db:
+                    db.replace_photos(
+                        post_id,
+                        [{
+                            "position": 1,
+                            "file_path": "data/media/source/1/video.mp4",
+                            "media_type": "video",
+                        }],
+                    )
+                    db.mark_delivery(post_id, target="node", status="pending")
+
+                sent = publish_posts_to_wemessenger(
+                    database_path,
+                    [post_id],
+                    FakePublisher(fail=True),
+                    send_delay_seconds=0,
+                    target="node",
+                )
+                self.assertEqual(sent, 0)
+                self.assertTrue(media_path.exists())
+                with Database(database_path) as db:
+                    self.assertEqual(len(db.get_photos(post_id)), 1)
+
+    def test_startup_cleanup_removes_completed_media_only(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            database_path = root / "cleanup.db"
+            paths = [
+                root / "data/media/source/1/photo.jpg",
+                root / "data/media/source/2/photo.jpg",
+            ]
+            for path in paths:
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_bytes(b"media")
+
+            with Database(database_path) as db:
+                channel_id = db.upsert_channel(
+                    "source", "Source", "https://t.me/s/source", "2020-01-01T00:00:00+00:00"
+                )
+                post_ids = []
+                for message_id in (1, 2):
+                    post_id = db.upsert_post(
+                        channel_id,
+                        message_id=message_id,
+                        date=None,
+                        text=f"post {message_id}",
+                        views=None,
+                        source=f"https://t.me/source/{message_id}",
+                        scraped_at="2020-01-01T00:00:00+00:00",
+                    )
+                    db.replace_photos(
+                        post_id,
+                        [{
+                            "position": 1,
+                            "file_path": f"data/media/source/{message_id}/photo.jpg",
+                            "media_type": "image",
+                        }],
+                    )
+                    db.enqueue_for_publish(post_id, target="node")
+                    post_ids.append(post_id)
+                db.mark_delivery(post_ids[0], target="node", status="sent")
+
+            with patch.object(publisher_module, "ROOT_DIR", root):
+                _cleanup_completed_media(
+                    {"database": database_path, "delete_media_after_publish": True}
+                )
+
+            self.assertFalse(paths[0].exists())
+            self.assertTrue(paths[1].exists())
+            with Database(database_path) as db:
+                self.assertEqual(db.get_photos(post_ids[0]), [])
+                self.assertEqual(len(db.get_photos(post_ids[1])), 1)
 
 
 class WorkerConcurrencyTests(unittest.TestCase):
