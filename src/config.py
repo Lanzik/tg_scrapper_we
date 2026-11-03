@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from urllib.parse import urlparse
 
 import yaml
 
@@ -14,38 +15,72 @@ USER_AGENT = (
     "(KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
 )
 
-def _parse_channels(data: dict) -> list[str]:
-    """Accept `channels: [...]` and/or legacy single `channel:`."""
-    channels: list[str] = []
+def _channel_username(channel: str) -> str:
+    value = channel.strip()
+    if "t.me/" in value:
+        path = urlparse(value if "://" in value else f"https://{value}").path
+        parts = [part for part in path.split("/") if part and part != "s"]
+        value = parts[0] if parts else ""
+    return value.lstrip("@").strip("/")
 
+
+def _parse_channel_routes(data: dict) -> list[dict]:
+    """Accept legacy channel strings or mappings with per-channel settings."""
     raw_list = data.get("channels")
-    if raw_list is not None:
-        if not isinstance(raw_list, list):
-            raise SystemExit("`channels` in settings.yaml must be a list.")
-        for item in raw_list:
-            value = str(item or "").strip()
-            if value:
-                channels.append(value)
+    if raw_list is not None and not isinstance(raw_list, list):
+        raise SystemExit("`channels` in settings.yaml must be a list.")
 
-    single = str(data.get("channel") or "").strip()
-    if single and single not in channels:
-        channels.insert(0, single)
+    entries = list(raw_list or [])
+    single = data.get("channel")
+    if single:
+        entries.insert(0, single)
 
+    wm = data.get("wemessenger") or {}
+    default_node = str(wm.get("channel_node") or "").strip()
+    defaults = {
+        "poll_interval_seconds": data.get("poll_interval", 10),
+        "publish_interval_seconds": data.get("publish_interval", 15),
+        "send_delay_seconds": data.get("send_delay_seconds", 20),
+        "retention_days": data.get("retention_days", 0),
+    }
+    routes: list[dict] = []
     seen: set[str] = set()
-    unique: list[str] = []
-    for ch in channels:
-        key = ch.lstrip("@").lower()
-        if key in seen:
+    for entry in entries:
+        if isinstance(entry, dict):
+            channel = str(entry.get("telegram") or "").strip()
+            node = str(entry.get("wemessenger_node") or entry.get("channel_node") or default_node).strip()
+        else:
+            channel = str(entry or "").strip()
+            node = default_node
+        if not channel:
             continue
-        seen.add(key)
-        unique.append(ch)
 
-    if not unique:
+        username = _channel_username(channel)
+        if not username:
+            raise SystemExit(f"Invalid Telegram channel in settings.yaml: {channel!r}")
+        if username.lower() in seen:
+            raise SystemExit(f"Duplicate Telegram channel in settings.yaml: {channel}")
+        seen.add(username.lower())
+
+        route = {"telegram": channel, "username": username, "wemessenger_node": node}
+        for key, default in defaults.items():
+            raw_value = entry.get(key, default) if isinstance(entry, dict) else default
+            try:
+                value = int(raw_value)
+            except (TypeError, ValueError):
+                raise SystemExit(f"`{key}` for {channel} must be an integer.")
+            minimum = 0 if key in {"send_delay_seconds", "retention_days"} else 1
+            if value < minimum:
+                raise SystemExit(f"`{key}` for {channel} must be >= {minimum}.")
+            route[key] = value
+        routes.append(route)
+
+    if not routes:
         raise SystemExit(
             'Set `channels` in settings.yaml '
             '(example: channels: ["@Khabar_Fouri", "@khabaronline_ir"])'
         )
-    return unique
+    return routes
 
 
 def load_settings(path: Path | None = None) -> dict:
@@ -59,7 +94,12 @@ def load_settings(path: Path | None = None) -> dict:
     with settings_file.open(encoding="utf-8") as fh:
         data = yaml.safe_load(fh) or {}
 
-    channels = _parse_channels(data)
+    wm = data.get("wemessenger") or {}
+    if not isinstance(wm, dict):
+        raise SystemExit("`wemessenger` in settings.yaml must be a mapping.")
+
+    channel_routes = _parse_channel_routes(data)
+    channels = [route["telegram"] for route in channel_routes]
 
     limit_raw = data.get("limit", 50)
     try:
@@ -106,10 +146,6 @@ def load_settings(path: Path | None = None) -> dict:
     if not publish_log_path.is_absolute():
         publish_log_path = ROOT_DIR / publish_log_path
 
-    wm = data.get("wemessenger") or {}
-    if not isinstance(wm, dict):
-        raise SystemExit("`wemessenger` in settings.yaml must be a mapping.")
-
     proxy_raw = data.get("telegram_proxy")
     if proxy_raw is None or proxy_raw is True:
         telegram_proxy = "socks5://127.0.0.1:10808"
@@ -123,6 +159,7 @@ def load_settings(path: Path | None = None) -> dict:
 
     return {
         "channels": channels,
+        "channel_routes": channel_routes,
         "limit": None if limit_value == 0 else limit_value,
         "download_photos": bool(data.get("download_photos", True)),
         "database": db_path,
@@ -130,6 +167,7 @@ def load_settings(path: Path | None = None) -> dict:
         "poll_interval": poll_interval,
         "publish_interval": publish_interval,
         "send_delay_seconds": send_delay_seconds,
+        "retention_days": int(data.get("retention_days", 0)),
         "telegram_proxy": telegram_proxy,
         "scraper_use_proxy": scraper_use_proxy,
         "publish_use_proxy": publish_use_proxy,

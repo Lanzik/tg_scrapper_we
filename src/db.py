@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import sqlite3
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 SCHEMA = """
@@ -105,7 +105,7 @@ class Database:
             FROM posts p
             WHERE NOT EXISTS (
                 SELECT 1 FROM publish_queue q
-                WHERE q.post_id = p.id AND q.target = 'wemessenger'
+                WHERE q.post_id = p.id
             )
             """,
             (_now(),),
@@ -316,20 +316,27 @@ class Database:
         )
         self.conn.commit()
 
-    def get_pending_delivery_post_ids(self, target: str = "wemessenger") -> list[int]:
-        """Unpublished queue: pending or failed (retry)."""
-        rows = self.conn.execute(
-            """
+    def get_pending_delivery_post_ids(
+        self,
+        target: str = "wemessenger",
+        source_channel: str | None = None,
+    ) -> list[int]:
+        """Unpublished queue: pending or failed, optionally by source channel."""
+        query = """
             SELECT q.post_id AS id
             FROM publish_queue q
             JOIN posts p ON p.id = q.post_id
+            JOIN channels c ON c.id = p.channel_id
             WHERE q.target = ?
               AND q.status IN ('pending', 'failed')
-            ORDER BY q.queued_at ASC, p.message_id ASC, p.id ASC
-            """,
-            (target,),
-        ).fetchall()
-        return [int(r["id"]) for r in rows]
+        """
+        params: list = [target]
+        if source_channel:
+            query += " AND c.username = ?"
+            params.append(source_channel)
+        query += " ORDER BY q.queued_at ASC, p.message_id ASC, p.id ASC"
+        rows = self.conn.execute(query, params).fetchall()
+        return [int(row["id"]) for row in rows]
 
     def count_queue(self, target: str = "wemessenger") -> dict[str, int]:
         rows = self.conn.execute(
@@ -346,3 +353,67 @@ class Database:
             counts[str(row["status"])] = int(row["n"])
         counts["unpublished"] = counts["pending"] + counts["failed"]
         return counts
+
+    def count_channel_queue(self, target: str, source_channel: str) -> dict[str, int]:
+        rows = self.conn.execute(
+            """
+            SELECT q.status, COUNT(*) AS n
+            FROM publish_queue q
+            JOIN posts p ON p.id = q.post_id
+            JOIN channels c ON c.id = p.channel_id
+            WHERE q.target = ? AND c.username = ?
+            GROUP BY q.status
+            """,
+            (target, source_channel),
+        ).fetchall()
+        counts = {"pending": 0, "failed": 0, "sent": 0}
+        for row in rows:
+            counts[str(row["status"])] = int(row["n"])
+        counts["unpublished"] = counts["pending"] + counts["failed"]
+        return counts
+
+    def route_legacy_queue(self, routes: dict[str, str]) -> None:
+        """Move legacy global queue rows to each configured channel destination."""
+        for source_channel, target in routes.items():
+            if target == "wemessenger":
+                continue
+            self.conn.execute(
+                """
+                INSERT OR IGNORE INTO publish_queue
+                    (post_id, target, status, queued_at, sent_at, error)
+                SELECT q.post_id, ?, q.status, q.queued_at, q.sent_at, q.error
+                FROM publish_queue q
+                JOIN posts p ON p.id = q.post_id
+                JOIN channels c ON c.id = p.channel_id
+                WHERE q.target = 'wemessenger' AND c.username = ?
+                """,
+                (target, source_channel),
+            )
+            self.conn.execute(
+                """
+                DELETE FROM publish_queue
+                WHERE target = 'wemessenger' AND post_id IN (
+                    SELECT p.id FROM posts p
+                    JOIN channels c ON c.id = p.channel_id
+                    WHERE c.username = ?
+                )
+                """,
+                (source_channel,),
+            )
+        self.conn.commit()
+
+    def delete_channel_posts_older_than(self, username: str, days: int) -> int:
+        """Delete aged posts for one source channel; related rows cascade."""
+        if days <= 0:
+            return 0
+        cutoff = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
+        cursor = self.conn.execute(
+            """
+            DELETE FROM posts
+            WHERE channel_id = (SELECT id FROM channels WHERE username = ?)
+              AND scraped_at < ?
+            """,
+            (username, cutoff),
+        )
+        self.conn.commit()
+        return cursor.rowcount

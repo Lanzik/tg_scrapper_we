@@ -279,6 +279,7 @@ def scrape_channel(
     database: Path | None = None,
     only_new: bool = False,
     proxy: str | None = None,
+    target: str = "wemessenger",
 ) -> list[int]:
     """
     Scrape a *public* Telegram channel via https://t.me/s/<username>
@@ -345,10 +346,10 @@ def scrape_channel(
                     scraped_at=scraped_at,
                 )
                 # Persist on unpublished queue until WeMessenger send succeeds
-                db.enqueue_for_publish(post_row_id)
+                db.enqueue_for_publish(post_row_id, target=target)
                 saved_ids.append(post_row_id)
 
-            queue = db.count_queue()
+            queue = db.count_channel_queue(target, username)
             print(
                 f"Saved {len(saved_ids)} post(s); "
                 f"unpublished queue={queue['unpublished']} "

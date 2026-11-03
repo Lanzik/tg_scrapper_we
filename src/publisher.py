@@ -38,6 +38,7 @@ def publish_posts_to_wemessenger(
     client: WeMessengerClient,
     *,
     send_delay_seconds: int = 20,
+    target: str = "wemessenger",
 ) -> int:
     """Send posts to WeMessenger. Returns count successfully sent."""
     if not post_ids:
@@ -54,7 +55,7 @@ def publish_posts_to_wemessenger(
             post = db.get_post(post_id)
             if post is None:
                 continue
-            if db.is_delivered(post_id):
+            if db.is_delivered(post_id, target=target):
                 logger.info("skip already sent telegram #%s", post["message_id"])
                 continue
 
@@ -74,6 +75,7 @@ def publish_posts_to_wemessenger(
             except Exception as exc:
                 db.mark_delivery(
                     post_id,
+                    target=target,
                     status="failed",
                     sent_at=None,
                     error=str(exc)[:500],
@@ -85,7 +87,13 @@ def publish_posts_to_wemessenger(
                 )
                 continue
 
-            db.mark_delivery(post_id, status="sent", sent_at=now, error=None)
+            db.mark_delivery(
+                post_id,
+                target=target,
+                status="sent",
+                sent_at=now,
+                error=None,
+            )
             sent += 1
             mode = "image+caption" if photos else "text"
             preview = (text or "[photo only]")[:60].replace("\n", " ")
@@ -96,7 +104,7 @@ def publish_posts_to_wemessenger(
                 preview,
             )
 
-        queue = db.count_queue()
+        queue = db.count_queue(target)
         logger.info(
             "queue after publish: unpublished=%s pending=%s failed=%s sent=%s",
             queue["unpublished"],
@@ -113,11 +121,20 @@ def publish_pending_to_wemessenger(
     client: WeMessengerClient,
     *,
     send_delay_seconds: int = 20,
+    target: str = "wemessenger",
+    source_channel: str | None = None,
 ) -> tuple[int, int]:
     """Drain unpublished queue. Returns (sent, pending_before)."""
     with Database(database) as db:
-        pending = db.get_pending_delivery_post_ids()
-        queue = db.count_queue()
+        pending = db.get_pending_delivery_post_ids(
+            target=target,
+            source_channel=source_channel,
+        )
+        queue = (
+            db.count_channel_queue(target, source_channel)
+            if source_channel
+            else db.count_queue(target)
+        )
     if not pending:
         logger.info("unpublished queue empty (sent=%s)", queue["sent"])
         return 0, 0
@@ -132,5 +149,6 @@ def publish_pending_to_wemessenger(
         pending,
         client,
         send_delay_seconds=send_delay_seconds,
+        target=target,
     )
     return sent, len(pending)
