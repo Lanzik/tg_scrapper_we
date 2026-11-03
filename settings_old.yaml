@@ -1,0 +1,43 @@
+# Public Telegram channels to pull from (all forward to the same WeMessenger channel)
+channels:
+  - "@Farsna"
+
+# Max posts on first poll / one-shot scrape per channel (0 = as many as web preview allows)
+limit: 50
+
+# Download post photos (saved in DB as BLOB + files under data/media/)
+download_photos: true
+
+# SQLite database path (relative to project root)
+database: data/telegram.db
+
+# Keep loops running
+poll: true
+poll_interval: 10      # seconds — Telegram scrape (main.py)
+publish_interval: 15   # seconds — WeMessenger publish loop (publish.py)
+
+# Seconds to wait between each WeMessenger post send
+send_delay_seconds: 20
+
+# Logs
+log_file: logs/scrape.log
+publish_log_file: logs/publish.log
+log_level: INFO
+
+# Independent proxy toggles for each outbound path
+scraper_use_proxy: true
+publish_use_proxy: false
+
+# SOCKS5 proxy URL; enabled only when the relevant flag above is true
+telegram_proxy: "socks5://192.168.189.190:1089"
+# telegram_proxy: false
+
+# Forward scraped posts to a WeMessenger CHANNEL (publish.py)
+wemessenger:
+  enabled: true
+  bot_token: "j8BZxuq0GR4_GR11JOuII-nx0221TlSpLpt_dHXoRxSJ6fn735_odQYydXlWgpEE"
+  channel_node: "1f65e2b5-5a30-4deb-bfca-2cfa872f21a1"
+  api_base: "https://api.wemessenger.ir"
+  file_upload_url: "https://ms-file.wemessenger.ir/upload"
+  to_category: "CHANNEL"
+  session_id: "*"

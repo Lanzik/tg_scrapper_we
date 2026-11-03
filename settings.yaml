@@ -1,43 +1,41 @@
-# Public Telegram channels to pull from (all forward to the same WeMessenger channel)
 channels:
-  - "@Khabar_Fouri"
-  - "@khabaronline_ir"
+  - telegram: "@Farsna"
+    wemessenger_node: "j8BZxuq0GR4_GR11JOuII-nx0221TlSpLpt_dHXoRxSJ6fn735_odQYydXlWgpEE"
+    poll_interval_seconds: 30
+    publish_interval_seconds: 15
+    send_delay_seconds: 20
+    retention_days: 30
 
-# Max posts on first poll / one-shot scrape per channel (0 = as many as web preview allows)
+  # - telegram: "@"
+  #   wemessenger_node: "PASTE_SECOND_CHANNEL_UUID"
+  #   poll_interval_seconds: 60
+  #   publish_interval_seconds: 30
+  #   send_delay_seconds: 30
+  #   retention_days: 90
+
 limit: 50
-
-# Download post photos (saved in DB as BLOB + files under data/media/)
 download_photos: true
-
-# SQLite database path (relative to project root)
 database: data/telegram.db
 
-# Keep loops running
 poll: true
-poll_interval: 10      # seconds — Telegram scrape (main.py)
-publish_interval: 15   # seconds — WeMessenger publish loop (publish.py)
-
-# Seconds to wait between each WeMessenger post send
+poll_interval: 10
+publish_interval: 15
 send_delay_seconds: 20
+retention_days: 0 # 0 disables automatic deletion
 
-# Logs
 log_file: logs/scrape.log
-publish_log_file: logs/publish.log
 log_level: INFO
 
 # Independent proxy toggles for each outbound path
 scraper_use_proxy: true
 publish_use_proxy: false
 
-# SOCKS5 proxy URL; enabled only when the relevant flag above is true
-telegram_proxy: "socks5://127.0.0.1:10808"
-# telegram_proxy: false
+# Proxy URL used by either scraper or publish when its respective flag is enabled
+telegram_proxy: "socks5://192.168.189.190:1089"
 
-# Forward scraped posts to a WeMessenger CHANNEL (publish.py)
 wemessenger:
   enabled: true
-  bot_token: "j8BZxuq0GR4_GR11JOuII-nx0221TlSpLpt_dHXoRxSJ6fn735_odQYydXlWgpEE"
-  channel_node: "5a3533e2-f181-4066-9469-75b1abcfa2f7"
+  bot_token: "PASTE_BOT_TOKEN"
   api_base: "https://api.wemessenger.ir"
   file_upload_url: "https://ms-file.wemessenger.ir/upload"
   to_category: "CHANNEL"
