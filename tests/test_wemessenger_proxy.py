@@ -1,9 +1,11 @@
 import sys
 import sqlite3
 import tempfile
+import threading
 import unittest
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from unittest.mock import patch
 import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -12,6 +14,7 @@ sys.path.insert(0, str(ROOT / "src"))
 from scraper import _collect_posts, _parse_page
 from config import load_settings
 from db import Database
+from main import _publisher_worker, _scraper_worker
 from wemessenger import WeMessengerClient
 from wm_client import build_wemessenger
 
@@ -220,6 +223,50 @@ class ChannelRouteTests(unittest.TestCase):
                 self.assertEqual(db.delete_channel_posts_older_than("first", 30), 1)
                 self.assertIsNone(db.get_post(post_id))
                 self.assertEqual(db.count_queue("node-1")["unpublished"], 0)
+
+
+class WorkerConcurrencyTests(unittest.TestCase):
+    def test_publisher_runs_while_scraper_is_blocked(self):
+        route = {
+            "username": "source",
+            "telegram": "@source",
+            "poll_interval_seconds": 60,
+            "publish_interval_seconds": 60,
+        }
+        settings = {"channel_routes": [route]}
+        targets = {"source": "node"}
+        stop_event = threading.Event()
+        scrape_started = threading.Event()
+        release_scrape = threading.Event()
+        publish_called = threading.Event()
+
+        def block_scrape(*_args, **_kwargs):
+            scrape_started.set()
+            release_scrape.wait(timeout=3)
+
+        def finish_publish(*_args, **_kwargs):
+            publish_called.set()
+            stop_event.set()
+
+        scraper = threading.Thread(target=_scraper_worker, args=(settings, targets, stop_event))
+        publisher = threading.Thread(
+            target=_publisher_worker,
+            args=(settings, targets, {"source": object()}, stop_event),
+        )
+        try:
+            with patch("main._scrape_route", side_effect=block_scrape), patch(
+                "main._publish_route", side_effect=finish_publish
+            ):
+                scraper.start()
+                publisher.start()
+                self.assertTrue(scrape_started.wait(timeout=1))
+                self.assertTrue(publish_called.wait(timeout=1))
+                self.assertTrue(scraper.is_alive())
+        finally:
+            release_scrape.set()
+            stop_event.set()
+            scraper.join(timeout=2)
+            publisher.join(timeout=2)
 
 
 if __name__ == "__main__":

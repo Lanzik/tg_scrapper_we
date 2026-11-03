@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import threading
 import time
 
 from config import load_settings
@@ -47,6 +48,82 @@ def _expire_posts(settings: dict) -> None:
                 )
 
 
+def _publish_route(settings: dict, route: dict, target: str, client) -> None:
+    proxy = settings["telegram_proxy"] if settings["publish_use_proxy"] else None
+    if not wemessenger_reachable(settings["wemessenger"]["api_base"], proxy=proxy):
+        logger.warning("WeMessenger unreachable; queue retained for %s", route["telegram"])
+        return
+
+    sent, pending = publish_pending_to_wemessenger(
+        settings["database"],
+        client,
+        send_delay_seconds=route["send_delay_seconds"],
+        target=target,
+        source_channel=route["username"],
+    )
+    if pending:
+        logger.info("published %s/%s post(s) from %s", sent, pending, route["telegram"])
+
+
+def _scraper_worker(settings: dict, targets: dict[str, str], stop_event: threading.Event) -> None:
+    routes = settings["channel_routes"]
+    first_scrape = {route["username"]: True for route in routes}
+    next_scrape = {route["username"]: 0.0 for route in routes}
+    next_expire = time.monotonic() + 86400
+
+    while not stop_event.is_set():
+        now = time.monotonic()
+        for route in routes:
+            username = route["username"]
+            if now < next_scrape[username]:
+                continue
+            try:
+                _scrape_route(
+                    settings,
+                    route,
+                    initial=first_scrape[username],
+                    target=targets[username],
+                )
+                first_scrape[username] = False
+            except Exception:
+                logger.exception("scrape failed for %s", route["telegram"])
+            next_scrape[username] = time.monotonic() + route["poll_interval_seconds"]
+
+        if time.monotonic() >= next_expire:
+            try:
+                _expire_posts(settings)
+            except Exception:
+                logger.exception("database retention cleanup failed")
+            next_expire = time.monotonic() + 86400
+
+        wait_until = min([*next_scrape.values(), next_expire])
+        stop_event.wait(max(0.1, min(1.0, wait_until - time.monotonic())))
+
+
+def _publisher_worker(
+    settings: dict,
+    targets: dict[str, str],
+    clients: dict,
+    stop_event: threading.Event,
+) -> None:
+    routes = settings["channel_routes"]
+    next_publish = {route["username"]: 0.0 for route in routes}
+
+    while not stop_event.is_set():
+        for route in routes:
+            username = route["username"]
+            if time.monotonic() < next_publish[username]:
+                continue
+            try:
+                _publish_route(settings, route, targets[username], clients[username])
+            except Exception:
+                logger.exception("publish failed for %s", route["telegram"])
+            next_publish[username] = time.monotonic() + route["publish_interval_seconds"]
+
+        wait_until = min(next_publish.values())
+        stop_event.wait(max(0.1, min(1.0, wait_until - time.monotonic())))
+
+
 def main() -> None:
     settings = load_settings()
     setup_logging(settings["log_file"], level=settings["log_level"])
@@ -76,60 +153,57 @@ def main() -> None:
     )
     _expire_posts(settings)
 
-    first_scrape = {route["username"]: True for route in settings["channel_routes"]}
-    next_scrape = {route["username"]: 0.0 for route in settings["channel_routes"]}
-    next_publish = {route["username"]: 0.0 for route in settings["channel_routes"]}
-    next_expire = time.monotonic() + 86400
+    if not settings["poll"]:
+        for route in settings["channel_routes"]:
+            try:
+                _scrape_route(
+                    settings,
+                    route,
+                    initial=True,
+                    target=targets[route["username"]],
+                )
+            except Exception:
+                logger.exception("scrape failed for %s", route["telegram"])
+        if publishing_enabled:
+            for route in settings["channel_routes"]:
+                try:
+                    _publish_route(
+                        settings,
+                        route,
+                        targets[route["username"]],
+                        clients[route["username"]],
+                    )
+                except Exception:
+                    logger.exception("publish failed for %s", route["telegram"])
+        return
+
+    stop_event = threading.Event()
+    workers = [
+        threading.Thread(
+            target=_scraper_worker,
+            args=(settings, targets, stop_event),
+            name="telegram-scraper",
+        )
+    ]
+    if publishing_enabled:
+        workers.append(
+            threading.Thread(
+                target=_publisher_worker,
+                args=(settings, targets, clients, stop_event),
+                name="wemessenger-publisher",
+            )
+        )
 
     try:
-        while True:
-            now = time.monotonic()
-            for route in settings["channel_routes"]:
-                username = route["username"]
-                target = targets[username]
-                if now >= next_scrape[username]:
-                    try:
-                        _scrape_route(settings, route, initial=first_scrape[username], target=target)
-                        first_scrape[username] = False
-                    except Exception:
-                        logger.exception("scrape failed for %s", route["telegram"])
-                    next_scrape[username] = time.monotonic() + route["poll_interval_seconds"]
-
-                if publishing_enabled and now >= next_publish[username]:
-                    try:
-                        proxy = settings["telegram_proxy"] if settings["publish_use_proxy"] else None
-                        if wemessenger_reachable(settings["wemessenger"]["api_base"], proxy=proxy):
-                            sent, pending = publish_pending_to_wemessenger(
-                                settings["database"],
-                                clients[username],
-                                send_delay_seconds=route["send_delay_seconds"],
-                                target=target,
-                                source_channel=username,
-                            )
-                            if pending:
-                                logger.info("published %s/%s post(s) from %s", sent, pending, route["telegram"])
-                        else:
-                            logger.warning("WeMessenger unreachable; queue retained for %s", route["telegram"])
-                    except Exception:
-                        logger.exception("publish failed for %s", route["telegram"])
-                    next_publish[username] = time.monotonic() + route["publish_interval_seconds"]
-
-            if time.monotonic() >= next_expire:
-                try:
-                    _expire_posts(settings)
-                except Exception:
-                    logger.exception("database retention cleanup failed")
-                next_expire = time.monotonic() + 86400
-
-            if not settings["poll"]:
-                return
-
-            due_times = list(next_scrape.values())
-            if publishing_enabled:
-                due_times.extend(next_publish.values())
-            due_times.append(next_expire)
-            time.sleep(max(0.1, min(1.0, min(due_times) - time.monotonic())))
+        for worker in workers:
+            worker.start()
+        while any(worker.is_alive() for worker in workers):
+            for worker in workers:
+                worker.join(timeout=0.5)
     except KeyboardInterrupt:
+        stop_event.set()
+        for worker in workers:
+            worker.join()
         logger.info("Application stopped.")
 
 
