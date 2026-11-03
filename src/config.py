@@ -178,6 +178,7 @@ def load_settings(path: Path | None = None) -> dict:
         "publish_interval": publish_interval,
         "send_delay_seconds": send_delay_seconds,
         "max_media_per_post": max_media_per_post,
+        "deduplicate_posts": bool(data.get("deduplicate_posts", True)),
         "retention_days": int(data.get("retention_days", 0)),
         "telegram_proxy": telegram_proxy,
         "scraper_use_proxy": scraper_use_proxy,

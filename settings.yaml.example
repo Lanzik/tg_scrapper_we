@@ -16,6 +16,7 @@ channels:
 limit: 50
 download_media: true
 max_media_per_post: 1
+deduplicate_posts: true
 database: data/telegram.db
 
 poll: true

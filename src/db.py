@@ -3,8 +3,13 @@
 from __future__ import annotations
 
 import sqlite3
+import hashlib
+import json
+import re
+import unicodedata
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from text_clean import clean_post_text
 
 SCHEMA = """
 PRAGMA foreign_keys = ON;
@@ -26,6 +31,7 @@ CREATE TABLE IF NOT EXISTS posts (
     views       TEXT,
     source      TEXT,
     scraped_at  TEXT    NOT NULL,
+    content_hash TEXT,
     UNIQUE (channel_id, message_id)
 );
 
@@ -63,6 +69,33 @@ def _now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
+def _content_fingerprint(text: str, media: list[dict] | None = None) -> str | None:
+    normalized_text = unicodedata.normalize("NFKC", clean_post_text(text or "")).casefold()
+    normalized_text = "".join(
+        character
+        for character in normalized_text
+        if unicodedata.category(character) != "Cf"
+    )
+    normalized_text = normalized_text.replace("\u200c", " ")
+    normalized_text = re.sub(r"https?://\S+", " ", normalized_text)
+    normalized_text = " ".join(normalized_text.split())
+    if normalized_text:
+        content = {"text": normalized_text}
+    else:
+        media_items = []
+        for item in media or []:
+            url = str(item.get("url") or "").split("?", 1)[0].split("#", 1)[0]
+            media_type = str(item.get("type") or item.get("media_type") or "image").lower()
+            if url:
+                media_items.append({"type": media_type, "url": url})
+        if not media_items:
+            return None
+        content = {"media": media_items}
+
+    payload = json.dumps(content, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
 class Database:
     def __init__(self, path: Path) -> None:
         self.path = path
@@ -71,6 +104,7 @@ class Database:
         self.conn.row_factory = sqlite3.Row
         self.conn.executescript(SCHEMA)
         self._migrate_media_type()
+        self._migrate_content_hashes()
         self._migrate_from_deliveries()
         self._backfill_missing_queue_rows()
         self.conn.commit()
@@ -84,6 +118,35 @@ class Database:
             self.conn.execute(
                 "ALTER TABLE photos ADD COLUMN media_type TEXT NOT NULL DEFAULT 'image'"
             )
+
+    def _migrate_content_hashes(self) -> None:
+        columns = {
+            str(row["name"])
+            for row in self.conn.execute("PRAGMA table_info(posts)").fetchall()
+        }
+        if "content_hash" not in columns:
+            self.conn.execute("ALTER TABLE posts ADD COLUMN content_hash TEXT")
+        self.conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_posts_content_hash ON posts(content_hash)"
+        )
+
+        rows = self.conn.execute(
+            "SELECT id, text FROM posts WHERE content_hash IS NULL"
+        ).fetchall()
+        for row in rows:
+            media = [
+                {"type": item["media_type"], "url": item["url"]}
+                for item in self.conn.execute(
+                    "SELECT media_type, url FROM photos WHERE post_id = ? ORDER BY position",
+                    (row["id"],),
+                ).fetchall()
+            ]
+            fingerprint = _content_fingerprint(row["text"] or "", media)
+            if fingerprint:
+                self.conn.execute(
+                    "UPDATE posts SET content_hash = ? WHERE id = ?",
+                    (fingerprint, row["id"]),
+                )
 
     def _migrate_from_deliveries(self) -> None:
         """Copy legacy deliveries table into publish_queue once."""
@@ -160,19 +223,23 @@ class Database:
         views: str | None,
         source: str,
         scraped_at: str,
+        media: list[dict] | None = None,
     ) -> int:
+        content_hash = _content_fingerprint(text, media)
         self.conn.execute(
             """
-            INSERT INTO posts (channel_id, message_id, date, text, views, source, scraped_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO posts
+                (channel_id, message_id, date, text, views, source, scraped_at, content_hash)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(channel_id, message_id) DO UPDATE SET
                 date = excluded.date,
                 text = excluded.text,
                 views = excluded.views,
                 source = excluded.source,
-                scraped_at = excluded.scraped_at
+                scraped_at = excluded.scraped_at,
+                content_hash = excluded.content_hash
             """,
-            (channel_id, message_id, date, text, views, source, scraped_at),
+            (channel_id, message_id, date, text, views, source, scraped_at, content_hash),
         )
         row = self.conn.execute(
             """
@@ -183,6 +250,31 @@ class Database:
         ).fetchone()
         self.conn.commit()
         return int(row["id"])
+
+    def has_duplicate_post(self, text: str, media: list[dict] | None = None) -> bool:
+        fingerprint = _content_fingerprint(text, media)
+        if not fingerprint:
+            return False
+        return self.conn.execute(
+            "SELECT 1 FROM posts WHERE content_hash = ? LIMIT 1",
+            (fingerprint,),
+        ).fetchone() is not None
+
+    def get_prior_duplicate_post_id(self, post_id: int) -> int | None:
+        row = self.conn.execute(
+            """
+            SELECT previous.id
+            FROM posts current
+            JOIN posts previous
+              ON previous.content_hash = current.content_hash
+             AND previous.id < current.id
+            WHERE current.id = ?
+            ORDER BY previous.id ASC
+            LIMIT 1
+            """,
+            (post_id,),
+        ).fetchone()
+        return int(row["id"]) if row else None
 
     def replace_photos(
         self,

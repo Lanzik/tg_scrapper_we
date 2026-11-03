@@ -28,6 +28,7 @@ def _scrape_route(settings: dict, route: dict, *, initial: bool, target: str) ->
         proxy=proxy,
         target=target,
         max_media_per_post=settings["max_media_per_post"],
+        deduplicate_posts=settings["deduplicate_posts"],
     )
     if saved:
         logger.info("queued %s new post(s) from %s", len(saved), route["telegram"])

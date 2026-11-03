@@ -6,15 +6,17 @@ import unittest
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from unittest.mock import patch
+from unittest.mock import MagicMock
 import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from scraper import _collect_posts, _parse_page
+from scraper import _collect_posts, _parse_page, scrape_channel
 from config import load_settings
 from db import Database
 from main import _publisher_worker, _scraper_worker
+from publisher import publish_posts_to_wemessenger
 from wemessenger import WeMessengerClient
 from wm_client import build_wemessenger
 
@@ -58,6 +60,30 @@ class ScraperGuardTests(unittest.TestCase):
 
         _, posts = _parse_page(html, max_media_per_post=2)
         self.assertEqual([item["type"] for item in posts[0]["media"]], ["video", "image"])
+
+    def test_scraper_skips_duplicate_before_saving_or_queueing(self):
+        posts = [
+            {"id": 1, "date": None, "text": "Same post text", "views": None, "media": []},
+            {"id": 2, "date": None, "text": "  SAME   post text ", "views": None, "media": []},
+        ]
+        fake_http_client = MagicMock()
+        fake_http_client.__enter__.return_value = fake_http_client
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            database_path = root / "posts.db"
+            with patch("scraper.DATA_DIR", root), patch(
+                "scraper._collect_posts", return_value=("Source", posts)
+            ), patch("scraper.httpx.Client", return_value=fake_http_client):
+                saved = scrape_channel(
+                    "@source",
+                    database=database_path,
+                    only_new=False,
+                )
+
+            self.assertEqual(len(saved), 1)
+            with Database(database_path) as db:
+                self.assertEqual(db.conn.execute("SELECT COUNT(*) FROM posts").fetchone()[0], 1)
+                self.assertEqual(db.count_queue()["pending"], 1)
 
 
 class WemessengerProxyTests(unittest.TestCase):
@@ -141,6 +167,7 @@ class ChannelRouteTests(unittest.TestCase):
                 "retention_days": 60,
                 "max_media_per_post": 2,
                 "download_media": False,
+                "deduplicate_posts": True,
                 "wemessenger": {"enabled": True, "bot_token": "token"},
             }
         )
@@ -160,6 +187,7 @@ class ChannelRouteTests(unittest.TestCase):
         self.assertEqual(second["retention_days"], 60)
         self.assertEqual(settings["max_media_per_post"], 2)
         self.assertFalse(settings["download_media"])
+        self.assertTrue(settings["deduplicate_posts"])
 
     def test_existing_photos_table_migrates_media_type(self):
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -184,6 +212,47 @@ class ChannelRouteTests(unittest.TestCase):
                     for row in db.conn.execute("PRAGMA table_info(photos)").fetchall()
                 }
                 self.assertIn("media_type", columns)
+
+    def test_duplicate_fingerprint_normalizes_text_and_checks_other_channels(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            with Database(Path(temp_dir) / "dedupe.db") as db:
+                channel_id = db.upsert_channel(
+                    "first", "First", "https://t.me/s/first", "2020-01-01T00:00:00+00:00"
+                )
+                db.upsert_post(
+                    channel_id,
+                    message_id=1,
+                    date=None,
+                    text="BREAKING   story\nnow",
+                    views=None,
+                    source="https://t.me/first/1",
+                    scraped_at="2020-01-01T00:00:00+00:00",
+                )
+
+                self.assertTrue(db.has_duplicate_post("breaking story now"))
+                self.assertFalse(db.has_duplicate_post("a different post"))
+
+    def test_existing_posts_get_fingerprints_backfilled_on_open(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            database_path = Path(temp_dir) / "backfill.db"
+            with Database(database_path) as db:
+                channel_id = db.upsert_channel(
+                    "first", "First", "https://t.me/s/first", "2020-01-01T00:00:00+00:00"
+                )
+                post_id = db.upsert_post(
+                    channel_id,
+                    message_id=1,
+                    date=None,
+                    text="previous post",
+                    views=None,
+                    source="https://t.me/first/1",
+                    scraped_at="2020-01-01T00:00:00+00:00",
+                )
+                db.conn.execute("UPDATE posts SET content_hash = NULL WHERE id = ?", (post_id,))
+                db.conn.commit()
+
+            with Database(database_path) as db:
+                self.assertTrue(db.has_duplicate_post("PREVIOUS post"))
 
     def test_legacy_queue_is_routed_and_expired_posts_cascade(self):
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -223,6 +292,55 @@ class ChannelRouteTests(unittest.TestCase):
                 self.assertEqual(db.delete_channel_posts_older_than("first", 30), 1)
                 self.assertIsNone(db.get_post(post_id))
                 self.assertEqual(db.count_queue("node-1")["unpublished"], 0)
+
+
+class DuplicatePublishTests(unittest.TestCase):
+    def test_existing_duplicate_queue_publishes_only_first_copy(self):
+        class FakePublisher:
+            def __init__(self):
+                self.posts = []
+
+            def send_post(self, **kwargs):
+                self.posts.append(kwargs)
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            database_path = Path(temp_dir) / "duplicate-queue.db"
+            with Database(database_path) as db:
+                first_channel = db.upsert_channel(
+                    "first", "First", "https://t.me/s/first", "2020-01-01T00:00:00+00:00"
+                )
+                second_channel = db.upsert_channel(
+                    "second", "Second", "https://t.me/s/second", "2020-01-01T00:00:00+00:00"
+                )
+                post_ids = []
+                for channel_id, message_id in ((first_channel, 1), (second_channel, 2)):
+                    post_ids.append(
+                        db.upsert_post(
+                            channel_id,
+                            message_id=message_id,
+                            date=None,
+                            text="same announcement",
+                            views=None,
+                            source=f"https://t.me/source/{message_id}",
+                            scraped_at="2020-01-01T00:00:00+00:00",
+                        )
+                    )
+                    db.enqueue_for_publish(post_ids[-1], target="node")
+
+            publisher = FakePublisher()
+            sent = publish_posts_to_wemessenger(
+                database_path,
+                post_ids,
+                publisher,
+                send_delay_seconds=0,
+                target="node",
+            )
+
+            self.assertEqual(sent, 1)
+            self.assertEqual(len(publisher.posts), 1)
+            with Database(database_path) as db:
+                self.assertEqual(db.count_queue("node")["duplicate"], 1)
+                self.assertEqual(db.get_pending_delivery_post_ids("node"), [])
 
 
 class WorkerConcurrencyTests(unittest.TestCase):

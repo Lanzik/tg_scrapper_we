@@ -55,6 +55,21 @@ def publish_posts_to_wemessenger(
             post = db.get_post(post_id)
             if post is None:
                 continue
+            duplicate_of = db.get_prior_duplicate_post_id(post_id)
+            if duplicate_of is not None:
+                db.mark_delivery(
+                    post_id,
+                    target=target,
+                    status="duplicate",
+                    sent_at=None,
+                    error=f"duplicate content of post #{duplicate_of}",
+                )
+                logger.info(
+                    "skip duplicate telegram #%s (matches stored post #%s)",
+                    post["message_id"],
+                    duplicate_of,
+                )
+                continue
             if db.is_delivered(post_id, target=target):
                 logger.info("skip already sent telegram #%s", post["message_id"])
                 continue
@@ -106,11 +121,12 @@ def publish_posts_to_wemessenger(
 
         queue = db.count_queue(target)
         logger.info(
-            "queue after publish: unpublished=%s pending=%s failed=%s sent=%s",
+            "queue after publish: unpublished=%s pending=%s failed=%s sent=%s duplicates=%s",
             queue["unpublished"],
             queue["pending"],
             queue["failed"],
             queue["sent"],
+            queue.get("duplicate", 0),
         )
 
     return sent

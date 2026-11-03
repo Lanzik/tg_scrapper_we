@@ -275,6 +275,7 @@ def _save_post(
         views=post["views"],
         source=f"https://t.me/{username}/{post['id']}",
         scraped_at=scraped_at,
+        media=post.get("media", []),
     )
 
     media_rows: list[dict] = []
@@ -326,6 +327,7 @@ def scrape_channel(
     proxy: str | None = None,
     target: str = "wemessenger",
     max_media_per_post: int = 1,
+    deduplicate_posts: bool = True,
 ) -> list[int]:
     """
     Scrape a *public* Telegram channel via https://t.me/s/<username>
@@ -381,6 +383,12 @@ def scrape_channel(
 
             for post in ordered:
                 if only_new and db.has_post(channel_id, post["id"]):
+                    continue
+                if deduplicate_posts and db.has_duplicate_post(
+                    post["text"] or "",
+                    post.get("media", []),
+                ):
+                    print(f"  skipped duplicate #{post['id']} from @{username}")
                     continue
                 post_row_id = _save_post(
                     db,
