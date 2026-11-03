@@ -15,8 +15,8 @@ from wemessenger import WeMessengerClient
 logger = logging.getLogger(__name__)
 
 
-def _photo_payloads(db: Database, post_id: int) -> list[tuple[bytes, str]]:
-    photos: list[tuple[bytes, str]] = []
+def _media_payloads(db: Database, post_id: int) -> list[tuple[bytes, str, str]]:
+    media: list[tuple[bytes, str, str]] = []
     for row in db.get_photos(post_id):
         content = row["image"]
         if not content and row["file_path"]:
@@ -28,8 +28,8 @@ def _photo_payloads(db: Database, post_id: int) -> list[tuple[bytes, str]]:
         if not content:
             continue
         name = Path(row["file_path"] or f"photo_{row['position']}.jpg").name
-        photos.append((bytes(content), name))
-    return photos
+        media.append((bytes(content), name, str(row["media_type"] or "image")))
+    return media
 
 
 def publish_posts_to_wemessenger(
@@ -67,11 +67,11 @@ def publish_posts_to_wemessenger(
                 time.sleep(send_delay_seconds)
 
             text = clean_post_text(post["text"] or "")
-            photos = _photo_payloads(db, post_id)
+            media = _media_payloads(db, post_id)
             now = datetime.now(timezone.utc).isoformat()
 
             try:
-                client.send_post(text=text, photos=photos)
+                client.send_post(text=text, media=media)
             except Exception as exc:
                 db.mark_delivery(
                     post_id,
@@ -95,8 +95,8 @@ def publish_posts_to_wemessenger(
                 error=None,
             )
             sent += 1
-            mode = "image+caption" if photos else "text"
-            preview = (text or "[photo only]")[:60].replace("\n", " ")
+            mode = f"{media[0][2]}+caption" if media else "text"
+            preview = (text or "[media only]")[:60].replace("\n", " ")
             logger.info(
                 "WeMessenger sent #%s (%s): %s",
                 post["message_id"],

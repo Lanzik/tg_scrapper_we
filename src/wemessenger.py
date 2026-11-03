@@ -161,23 +161,52 @@ class WeMessengerClient:
         filename: str,
         caption: str | None = None,
     ) -> dict[str, Any]:
-        """
-        Send image with optional caption.
+        return self.send_media(
+            client,
+            content=content,
+            filename=filename,
+            media_type="image",
+            caption=caption,
+        )
 
-        WeMessenger expects caption on file.caption (not top-level text),
-        and upload metadata such as sign must be forwarded.
-        """
+    def send_video(
+        self,
+        client: httpx.Client,
+        *,
+        content: bytes,
+        filename: str,
+        caption: str | None = None,
+    ) -> dict[str, Any]:
+        return self.send_media(
+            client,
+            content=content,
+            filename=filename,
+            media_type="video",
+            caption=caption,
+        )
+
+    def send_media(
+        self,
+        client: httpx.Client,
+        *,
+        content: bytes,
+        filename: str,
+        media_type: str,
+        caption: str | None = None,
+    ) -> dict[str, Any]:
+        if media_type not in {"image", "video"}:
+            raise ValueError(f"Unsupported WeMessenger media type: {media_type}")
         uploaded = self.upload_file(
             client,
             content=content,
             filename=filename,
-            file_type="image",
+            file_type=media_type,
         )
 
         file_obj: dict[str, Any] = {
             "uuid": str(uploaded["uuid"]),
             "size": str(uploaded["size"]),
-            "type": str(uploaded.get("type") or "image"),
+            "type": str(uploaded.get("type") or media_type),
         }
         if not file_obj.get("name"):
             file_obj["name"] = filename
@@ -191,7 +220,8 @@ class WeMessengerClient:
             file_obj["caption"] = self._trim_text(caption)
 
         logger.info(
-            "WeMessenger send image file=%s caption=%s sign=%s",
+            "WeMessenger send %s file=%s caption=%s sign=%s",
+            media_type,
             filename,
             bool(file_obj.get("caption")),
             bool(file_obj.get("sign")),
@@ -209,16 +239,18 @@ class WeMessengerClient:
         self,
         *,
         text: str,
-        photos: list[tuple[bytes, str]],
+        media: list[tuple[bytes, str, str]] | None = None,
+        photos: list[tuple[bytes, str]] | None = None,
     ) -> None:
         """
         Send one Telegram post to the WeMessenger channel.
 
-        - With photos: ONE message = image + caption on file.caption.
-          Extra photos follow as image-only messages.
+        With media, the first item carries the caption; extra items follow alone.
         - Text only: send text message.
         """
         caption = (text or "").strip() or None
+        if media is None:
+            media = [(content, filename, "image") for content, filename in photos or []]
 
         with httpx.Client(
             follow_redirects=True,
@@ -226,19 +258,21 @@ class WeMessengerClient:
             trust_env=False,
             proxy=self.proxy,
         ) as client:
-            if photos:
-                first_bytes, first_name = photos[0]
-                self.send_image(
+            if media:
+                first_bytes, first_name, first_type = media[0]
+                self.send_media(
                     client,
                     content=first_bytes,
                     filename=first_name,
+                    media_type=first_type,
                     caption=caption,
                 )
-                for content, filename in photos[1:]:
-                    self.send_image(
+                for content, filename, media_type in media[1:]:
+                    self.send_media(
                         client,
                         content=content,
                         filename=filename,
+                        media_type=media_type,
                         caption=None,
                     )
                 return
@@ -247,4 +281,4 @@ class WeMessengerClient:
                 self.send_text(client, caption)
                 return
 
-            raise ValueError("post has neither text nor photos")
+            raise ValueError("post has neither text nor media")

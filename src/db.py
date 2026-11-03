@@ -35,6 +35,7 @@ CREATE TABLE IF NOT EXISTS photos (
     position    INTEGER NOT NULL DEFAULT 1,
     url         TEXT,
     file_path   TEXT,
+    media_type  TEXT    NOT NULL DEFAULT 'image',
     image       BLOB,
     UNIQUE (post_id, position)
 );
@@ -69,9 +70,20 @@ class Database:
         self.conn = sqlite3.connect(self.path)
         self.conn.row_factory = sqlite3.Row
         self.conn.executescript(SCHEMA)
+        self._migrate_media_type()
         self._migrate_from_deliveries()
         self._backfill_missing_queue_rows()
         self.conn.commit()
+
+    def _migrate_media_type(self) -> None:
+        columns = {
+            str(row["name"])
+            for row in self.conn.execute("PRAGMA table_info(photos)").fetchall()
+        }
+        if "media_type" not in columns:
+            self.conn.execute(
+                "ALTER TABLE photos ADD COLUMN media_type TEXT NOT NULL DEFAULT 'image'"
+            )
 
     def _migrate_from_deliveries(self) -> None:
         """Copy legacy deliveries table into publish_queue once."""
@@ -181,8 +193,8 @@ class Database:
         self.conn.execute("DELETE FROM photos WHERE post_id = ?", (post_id,))
         self.conn.executemany(
             """
-            INSERT INTO photos (post_id, position, url, file_path, image)
-            VALUES (?, ?, ?, ?, ?)
+                INSERT INTO photos (post_id, position, url, file_path, media_type, image)
+                VALUES (?, ?, ?, ?, ?, ?)
             """,
             [
                 (
@@ -190,6 +202,7 @@ class Database:
                     p["position"],
                     p.get("url"),
                     p.get("file_path"),
+                    p.get("media_type", "image"),
                     p.get("image"),
                 )
                 for p in photos

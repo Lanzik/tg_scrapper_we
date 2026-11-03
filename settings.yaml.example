@@ -14,7 +14,8 @@ channels:
     retention_days: 90
 
 limit: 50
-download_photos: true
+download_media: true
+max_media_per_post: 1
 database: data/telegram.db
 
 poll: true

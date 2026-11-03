@@ -131,6 +131,14 @@ def load_settings(path: Path | None = None) -> dict:
     if send_delay_seconds < 0:
         raise SystemExit("`send_delay_seconds` must be >= 0.")
 
+    media_limit_raw = data.get("max_media_per_post", 1)
+    try:
+        max_media_per_post = int(media_limit_raw)
+    except (TypeError, ValueError):
+        raise SystemExit("`max_media_per_post` must be an integer.")
+    if max_media_per_post < 1:
+        raise SystemExit("`max_media_per_post` must be >= 1.")
+
     db_raw = str(data.get("database") or "data/telegram.db").strip()
     db_path = Path(db_raw)
     if not db_path.is_absolute():
@@ -156,17 +164,20 @@ def load_settings(path: Path | None = None) -> dict:
 
     scraper_use_proxy = bool(data.get("scraper_use_proxy", True))
     publish_use_proxy = bool(data.get("publish_use_proxy", False))
+    download_media = bool(data.get("download_media", data.get("download_photos", True)))
 
     return {
         "channels": channels,
         "channel_routes": channel_routes,
         "limit": None if limit_value == 0 else limit_value,
-        "download_photos": bool(data.get("download_photos", True)),
+        "download_media": download_media,
+        "download_photos": download_media,
         "database": db_path,
         "poll": bool(data.get("poll", True)),
         "poll_interval": poll_interval,
         "publish_interval": publish_interval,
         "send_delay_seconds": send_delay_seconds,
+        "max_media_per_post": max_media_per_post,
         "retention_days": int(data.get("retention_days", 0)),
         "telegram_proxy": telegram_proxy,
         "scraper_use_proxy": scraper_use_proxy,

@@ -21,11 +21,12 @@ def _scrape_route(settings: dict, route: dict, *, initial: bool, target: str) ->
     saved = scrape_channel(
         route["telegram"],
         limit=settings["limit"] if initial else None,
-        download_photos=settings["download_photos"],
+        download_photos=settings["download_media"],
         database=settings["database"],
         only_new=True,
         proxy=proxy,
         target=target,
+        max_media_per_post=settings["max_media_per_post"],
     )
     if saved:
         logger.info("queued %s new post(s) from %s", len(saved), route["telegram"])

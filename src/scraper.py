@@ -39,17 +39,43 @@ def _headers() -> dict[str, str]:
     return {"User-Agent": USER_AGENT, "Accept-Language": "en-US,en;q=0.9"}
 
 
-def _extract_photos(message_el) -> list[str]:
-    urls: list[str] = []
-    for wrap in message_el.select("a.tgme_widget_message_photo_wrap"):
-        style = wrap.get("style") or ""
-        match = PHOTO_URL_RE.search(style)
-        if match:
-            urls.append(match.group(1))
-    return urls
+def _extract_media(message_el, limit: int) -> list[dict[str, str]]:
+    media: list[dict[str, str]] = []
+    seen: set[str] = set()
+
+    for element in message_el.select(
+        "a.tgme_widget_message_photo_wrap, .tgme_widget_message_video_player, video"
+    ):
+        media_type = "image"
+        url = None
+        if element.name == "a":
+            match = PHOTO_URL_RE.search(element.get("style") or "")
+            url = match.group(1) if match else None
+        elif element.name == "video":
+            media_type = "video"
+            url = element.get("src") or element.get("data-src")
+            if not url:
+                source = element.select_one("source[src], source[data-src]")
+                if source:
+                    url = source.get("src") or source.get("data-src")
+        else:
+            media_type = "video"
+            url = (
+                element.get("data-video")
+                or element.get("data-video-url")
+                or element.get("src")
+            )
+
+        if not url or not url.startswith(("http://", "https://")) or url in seen:
+            continue
+        media.append({"type": media_type, "url": url})
+        seen.add(url)
+        if len(media) >= limit:
+            break
+    return media
 
 
-def _parse_message(message_el) -> dict | None:
+def _parse_message(message_el, *, max_media_per_post: int = 1) -> dict | None:
     data_post = message_el.get("data-post")  # e.g. channel/123
     if not data_post or "/" not in data_post:
         return None
@@ -62,8 +88,8 @@ def _parse_message(message_el) -> dict | None:
 
     text_el = message_el.select_one(".tgme_widget_message_text")
     text = text_el.get_text("\n", strip=True) if text_el else ""
-    photos = _extract_photos(message_el)
-    if not text and not photos:
+    media = _extract_media(message_el, max_media_per_post)
+    if not text and not media:
         return None
 
     time_el = message_el.select_one("time[datetime]")
@@ -78,18 +104,22 @@ def _parse_message(message_el) -> dict | None:
         "date": date,
         "text": text,
         "views": views,
-        "photo_urls": photos,
+        "media": media,
     }
 
 
-def _parse_page(html: str) -> tuple[str | None, list[dict]]:
+def _parse_page(
+    html: str,
+    *,
+    max_media_per_post: int = 1,
+) -> tuple[str | None, list[dict]]:
     soup = BeautifulSoup(html, "lxml")
     title_el = soup.select_one(".tgme_channel_info_header_title")
     title = title_el.get_text(strip=True) if title_el else None
 
     posts: list[dict] = []
     for el in soup.select(".tgme_widget_message"):
-        post = _parse_message(el)
+        post = _parse_message(el, max_media_per_post=max_media_per_post)
         if post:
             posts.append(post)
     return title, posts
@@ -122,17 +152,23 @@ def _looks_like_telegram_channel_html(html: str) -> bool:
     return True
 
 
-def _download_bytes(client: httpx.Client, url: str) -> tuple[bytes | None, str]:
+def _download_bytes(
+    client: httpx.Client,
+    url: str,
+    *,
+    media_type: str = "image",
+) -> tuple[bytes | None, str]:
     """Return (content, preferred_suffix)."""
     try:
         response = client.get(url)
         response.raise_for_status()
-        suffix = Path(urlparse(url).path).suffix or ".jpg"
-        if "?" in suffix or len(suffix) > 5:
-            suffix = ".jpg"
+        suffix = Path(urlparse(url).path).suffix.lower()
+        allowed = {".mp4", ".m4v", ".mov", ".webm", ".mkv"} if media_type == "video" else {".jpg", ".jpeg", ".png", ".webp", ".gif"}
+        if suffix not in allowed:
+            suffix = ".mp4" if media_type == "video" else ".jpg"
         return response.content, suffix
     except httpx.HTTPError:
-        return None, ".jpg"
+        return None, ".mp4" if media_type == "video" else ".jpg"
 
 
 def _collect_posts(
@@ -141,6 +177,7 @@ def _collect_posts(
     *,
     limit: int | None,
     after_id: int | None = None,
+    max_media_per_post: int = 1,
 ) -> tuple[str | None, list[dict]]:
     """
     Fetch posts from the web preview.
@@ -172,7 +209,10 @@ def _collect_posts(
                 f"Snippet: {snippet!r}"
             )
 
-        page_title, posts = _parse_page(response.text)
+        page_title, posts = _parse_page(
+            response.text,
+            max_media_per_post=max_media_per_post,
+        )
         if page_title:
             title = page_title
 
@@ -224,6 +264,7 @@ def _save_post(
     post: dict,
     media_dir: Path,
     download_photos: bool,
+    max_media_per_post: int,
     scraped_at: str,
 ) -> int:
     post_id = db.upsert_post(
@@ -236,38 +277,42 @@ def _save_post(
         scraped_at=scraped_at,
     )
 
-    photo_rows: list[dict] = []
-    if download_photos and post["photo_urls"]:
+    media_rows: list[dict] = []
+    media_items = post.get("media", [])[:max_media_per_post]
+    if download_photos and media_items:
         post_media = media_dir / str(post["id"])
         post_media.mkdir(parents=True, exist_ok=True)
 
-        for i, photo_url in enumerate(post["photo_urls"], start=1):
-            content, suffix = _download_bytes(client, photo_url)
+        for i, media in enumerate(media_items, start=1):
+            media_type = media["type"]
+            content, suffix = _download_bytes(
+                client,
+                media["url"],
+                media_type=media_type,
+            )
             if content is None:
                 continue
 
-            name = (
-                f"photo_{i}{suffix}"
-                if len(post["photo_urls"]) > 1
-                else f"photo{suffix}"
-            )
+            prefix = "video" if media_type == "video" else "photo"
+            name = f"{prefix}_{i}{suffix}" if len(media_items) > 1 else f"{prefix}{suffix}"
             file_path = post_media / name
             file_path.write_bytes(content)
 
-            photo_rows.append(
+            media_rows.append(
                 {
                     "position": i,
-                    "url": photo_url,
+                    "url": media["url"],
                     "file_path": str(file_path.relative_to(DATA_DIR.parent)),
-                    "image": content,
+                    "media_type": media_type,
+                    "image": content if media_type == "image" else None,
                 }
             )
 
-    db.replace_photos(post_id, photo_rows)
+    db.replace_photos(post_id, media_rows)
 
-    preview = (post["text"] or "[photo only]")[:80].replace("\n", " ")
-    photo_note = f" (+{len(photo_rows)} photo)" if photo_rows else ""
-    print(f"  saved #{post['id']}: {preview}{photo_note}")
+    preview = (post["text"] or "[media only]")[:80].replace("\n", " ")
+    media_note = f" (+{len(media_rows)} media)" if media_rows else ""
+    print(f"  saved #{post['id']}: {preview}{media_note}")
     return post_id
 
 
@@ -280,6 +325,7 @@ def scrape_channel(
     only_new: bool = False,
     proxy: str | None = None,
     target: str = "wemessenger",
+    max_media_per_post: int = 1,
 ) -> list[int]:
     """
     Scrape a *public* Telegram channel via https://t.me/s/<username>
@@ -313,6 +359,7 @@ def scrape_channel(
                 username,
                 limit=limit,
                 after_id=after_id,
+                max_media_per_post=max_media_per_post,
             )
 
             mode = "new posts only" if only_new else "posts"
@@ -343,6 +390,7 @@ def scrape_channel(
                     post=post,
                     media_dir=media_dir,
                     download_photos=download_photos,
+                    max_media_per_post=max_media_per_post,
                     scraped_at=scraped_at,
                 )
                 # Persist on unpublished queue until WeMessenger send succeeds

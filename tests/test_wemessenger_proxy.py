@@ -1,4 +1,5 @@
 import sys
+import sqlite3
 import tempfile
 import unittest
 from datetime import datetime, timedelta, timezone
@@ -8,9 +9,10 @@ import yaml
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from scraper import _collect_posts
+from scraper import _collect_posts, _parse_page
 from config import load_settings
 from db import Database
+from wemessenger import WeMessengerClient
 from wm_client import build_wemessenger
 
 
@@ -34,6 +36,25 @@ class ScraperGuardTests(unittest.TestCase):
 
         with self.assertRaisesRegex(RuntimeError, "no channel content|challenge|bot"):
             _collect_posts(FakeClient(), "Khabar_Fouri", limit=10)
+
+    def test_parser_limits_mixed_media_and_keeps_video_type(self):
+        html = """
+        <div class="tgme_channel_info_header_title">Test</div>
+        <div class="tgme_widget_message" data-post="test/1">
+                    <div class="tgme_widget_message_video_player"
+                             data-video="https://cdn.test/clip.mp4"></div>
+          <a class="tgme_widget_message_photo_wrap"
+             style="background-image:url(https://cdn.test/photo.jpg)"></a>
+        </div>
+        """
+        _, posts = _parse_page(html, max_media_per_post=1)
+        self.assertEqual(
+            posts[0]["media"],
+            [{"type": "video", "url": "https://cdn.test/clip.mp4"}],
+        )
+
+        _, posts = _parse_page(html, max_media_per_post=2)
+        self.assertEqual([item["type"] for item in posts[0]["media"]], ["video", "image"])
 
 
 class WemessengerProxyTests(unittest.TestCase):
@@ -75,6 +96,26 @@ class WemessengerProxyTests(unittest.TestCase):
 
         self.assertIsNone(client.proxy)
 
+    def test_send_video_uploads_as_video_and_keeps_caption(self):
+        client = WeMessengerClient("token", "node")
+        client.upload_file = lambda _client, **kwargs: {
+            "uuid": "media-id",
+            "size": 12,
+            "type": kwargs["file_type"],
+        }
+        sent = {}
+        client._send = lambda _client, payload: sent.update(payload) or {}
+
+        client.send_video(
+            object(),
+            content=b"video-bytes",
+            filename="clip.mp4",
+            caption="video caption",
+        )
+
+        self.assertEqual(sent["file"]["type"], "video")
+        self.assertEqual(sent["file"]["caption"], "video caption")
+
 
 class ChannelRouteTests(unittest.TestCase):
     def test_load_settings_supports_channel_specific_routes_and_defaults(self):
@@ -95,6 +136,8 @@ class ChannelRouteTests(unittest.TestCase):
                 "publish_interval": 15,
                 "send_delay_seconds": 20,
                 "retention_days": 60,
+                "max_media_per_post": 2,
+                "download_media": False,
                 "wemessenger": {"enabled": True, "bot_token": "token"},
             }
         )
@@ -112,6 +155,32 @@ class ChannelRouteTests(unittest.TestCase):
         self.assertEqual(first["retention_days"], 14)
         self.assertEqual(second["wemessenger_node"], "node-2")
         self.assertEqual(second["retention_days"], 60)
+        self.assertEqual(settings["max_media_per_post"], 2)
+        self.assertFalse(settings["download_media"])
+
+    def test_existing_photos_table_migrates_media_type(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            database_path = Path(temp_dir) / "legacy.db"
+            connection = sqlite3.connect(database_path)
+            connection.execute(
+                """CREATE TABLE photos (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    post_id INTEGER NOT NULL,
+                    position INTEGER NOT NULL DEFAULT 1,
+                    url TEXT,
+                    file_path TEXT,
+                    image BLOB,
+                    UNIQUE (post_id, position)
+                )"""
+            )
+            connection.close()
+
+            with Database(database_path) as db:
+                columns = {
+                    row["name"]
+                    for row in db.conn.execute("PRAGMA table_info(photos)").fetchall()
+                }
+                self.assertIn("media_type", columns)
 
     def test_legacy_queue_is_routed_and_expired_posts_cascade(self):
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -130,8 +199,15 @@ class ChannelRouteTests(unittest.TestCase):
                 )
                 db.replace_photos(
                     post_id,
-                    [{"position": 1, "url": None, "file_path": None, "image": b"image"}],
+                    [{
+                        "position": 1,
+                        "url": None,
+                        "file_path": "data/media/first/1/video.mp4",
+                        "media_type": "video",
+                        "image": None,
+                    }],
                 )
+                self.assertEqual(db.get_photos(post_id)[0]["media_type"], "video")
                 db.enqueue_for_publish(post_id)
                 db.route_legacy_queue({"first": "node-1"})
 
