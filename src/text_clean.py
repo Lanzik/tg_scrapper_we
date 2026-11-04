@@ -12,6 +12,15 @@ _HAS_WORD = re.compile(r"[\w\u0600-\u06FF]", re.UNICODE)
 _URL = re.compile(r"https?://\S+", re.IGNORECASE)
 
 
+def _match_form(value: str) -> str:
+    normalized = unicodedata.normalize("NFKC", value).casefold()
+    return "".join(
+        {"\u064a": "\u06cc", "\u0643": "\u06a9"}.get(character, character)
+        for character in normalized
+        if unicodedata.category(character) != "Cf" and character != "\u0640"
+    )
+
+
 def contains_excluded_term(text: str, terms: list[str] | tuple[str, ...]) -> str | None:
     normalized_text = unicodedata.normalize("NFKC", text or "").casefold()
     for term in terms:
@@ -51,16 +60,17 @@ def clean_post_text(
         if not last:
             lines.pop()
             continue
+        normalized_last = _match_form(last)
+        phrase_matches = any(
+            _match_form(str(phrase).strip()) in normalized_last
+            for phrase in remove_trailing_phrases
+            if str(phrase).strip()
+        )
+        if phrase_matches:
+            lines.pop()
+            continue
+
         cleaned = last
-        for phrase in remove_trailing_phrases:
-            phrase = str(phrase).strip()
-            if phrase:
-                cleaned = re.sub(
-                    rf"(?<!\w){re.escape(phrase)}(?!\w)",
-                    "",
-                    cleaned,
-                    flags=re.IGNORECASE,
-                )
         if remove_trailing_urls:
             cleaned = _URL.sub("", cleaned)
         cleaned = cleaned.strip(" \t|,-")

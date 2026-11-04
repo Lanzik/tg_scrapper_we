@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import random
 import threading
 import time
 
@@ -117,10 +118,16 @@ def _scraper_worker(settings: dict, targets: dict[str, str], stop_event: threadi
 
     while not stop_event.is_set():
         now = time.monotonic()
-        for route in routes:
+        due_routes = [
+            route
+            for route in routes
+            if now >= next_scrape[route["username"]]
+        ]
+        random.shuffle(due_routes)
+        for route in due_routes:
+            if stop_event.is_set():
+                break
             username = route["username"]
-            if now < next_scrape[username]:
-                continue
             try:
                 _scrape_route(
                     settings,

@@ -25,7 +25,7 @@ channels:
 
 `poll_interval_seconds` is the pause between Telegram checks. `publish_interval_seconds` is the pause between attempts to drain that source's queue. `send_delay_seconds` is the pause between messages in a publishing batch. `retention_days` deletes posts older than that many days, measured from when they were scraped; set it to `0` to keep data indefinitely. Deleting a post also deletes its photos and queue rows.
 
-Each channel can set `footer_tag` to ensure its tag appears once on a separate final line. `remove_trailing_phrases` removes configured labels such as `Link` only from trailing lines, and `remove_trailing_urls: true` removes URLs from the end of a post. These cleanup options can also be set globally as defaults.
+Each channel can set `footer_tag` to ensure its tag appears once on a separate final line. `remove_trailing_phrases` removes the entire trailing line when it contains a configured label such as `Link`, and `remove_trailing_urls: true` removes URLs from the end of a post. Persian ZWNJ and common Arabic/Persian Yeh/Kaf variants are normalized for phrase matching. These cleanup options can also be set globally as defaults.
 
 Each channel can also define `exclude_post_terms`, for example `exclude_post_terms: ["example"]`. Matching is case-insensitive substring matching on post text. New matches are skipped before saving; existing queued matches are marked `filtered` and never sent. Filtered posts remain in the database for audit and can be removed later by normal retention.
 
@@ -56,7 +56,7 @@ python src/main.py
 ```
 
 Set `poll: false` to perform one scrape/publish pass and exit. Stop a continuous run with Ctrl+C.
-In continuous mode, scraping runs separately from publishing, and each configured channel has its own publisher worker. A channel's `send_delay_seconds` applies only between that channel's posts and does not delay other channels. One-shot mode scrapes first, then publishes the resulting queue.
+In continuous mode, all due Telegram channels are scraped sequentially in a newly shuffled order each pass. Each channel keeps its own polling interval. Publishing runs separately, with one worker per configured channel; a channel's `send_delay_seconds` does not delay other channels. One-shot mode scrapes first, then publishes the resulting queue.
 
 For deployment, run this command from a service manager such as systemd or Supervisor with the project root as its working directory. Keep `settings.yaml` on the host and ensure the service user can write to the configured database and log paths. The process handles `SIGINT` via Ctrl+C; use the service manager's normal stop/restart controls.
 

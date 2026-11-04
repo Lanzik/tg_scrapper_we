@@ -74,6 +74,20 @@ class ScraperGuardTests(unittest.TestCase):
             ),
             "Link is useful in this paragraph\nbody",
         )
+        self.assertEqual(
+            clean_post_text(
+                "خبر\nتوییتر \u200c| اینستاگرام | اخبار",
+                remove_trailing_phrases=["توییتر"],
+            ),
+            "خبر",
+        )
+        self.assertEqual(
+            clean_post_text(
+                "خبر\nتوييتر | اینستاگرام | اخبار",
+                remove_trailing_phrases=["توییتر"],
+            ),
+            "خبر",
+        )
 
     def test_parser_limits_mixed_media_and_keeps_video_type(self):
         html = """
@@ -601,6 +615,28 @@ class DuplicatePublishTests(unittest.TestCase):
 
 
 class WorkerConcurrencyTests(unittest.TestCase):
+    def test_scraper_shuffles_all_due_channels(self):
+        routes = [
+            {"username": "source_a", "telegram": "@source_a", "poll_interval_seconds": 60},
+            {"username": "source_b", "telegram": "@source_b", "poll_interval_seconds": 60},
+        ]
+        settings = {"channel_routes": routes}
+        targets = {"source_a": "node_a", "source_b": "node_b"}
+        stop_event = threading.Event()
+        scraped = []
+
+        def record_scrape(_settings, route, **_kwargs):
+            scraped.append(route["username"])
+            if len(scraped) == len(routes):
+                stop_event.set()
+
+        with patch("main.random.shuffle", side_effect=lambda due: due.reverse()), patch(
+            "main._scrape_route", side_effect=record_scrape
+        ):
+            _scraper_worker(settings, targets, stop_event)
+
+        self.assertEqual(scraped, ["source_b", "source_a"])
+
     def test_publisher_runs_while_scraper_is_blocked(self):
         route = {
             "username": "source",
