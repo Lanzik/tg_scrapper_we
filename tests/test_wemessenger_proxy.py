@@ -626,7 +626,7 @@ class WorkerConcurrencyTests(unittest.TestCase):
         scraper = threading.Thread(target=_scraper_worker, args=(settings, targets, stop_event))
         publisher = threading.Thread(
             target=_publisher_worker,
-            args=(settings, targets, {"source": object()}, stop_event),
+            args=(settings, targets, {"source": object()}, stop_event, route),
         )
         try:
             with patch("main._scrape_route", side_effect=block_scrape), patch(
@@ -642,6 +642,53 @@ class WorkerConcurrencyTests(unittest.TestCase):
             stop_event.set()
             scraper.join(timeout=2)
             publisher.join(timeout=2)
+
+    def test_channel_publisher_workers_do_not_block_each_other(self):
+        route_x = {
+            "username": "source_x",
+            "telegram": "@source_x",
+            "publish_interval_seconds": 60,
+        }
+        route_y = {
+            "username": "source_y",
+            "telegram": "@source_y",
+            "publish_interval_seconds": 60,
+        }
+        settings = {"channel_routes": [route_x, route_y]}
+        targets = {"source_x": "node_x", "source_y": "node_y"}
+        stop_event = threading.Event()
+        source_x_started = threading.Event()
+        release_x = threading.Event()
+        source_y_published = threading.Event()
+
+        def publish_route(_settings, route, _target, _client):
+            if route["username"] == "source_x":
+                source_x_started.set()
+                release_x.wait(timeout=3)
+            else:
+                source_y_published.set()
+                stop_event.set()
+
+        publisher_x = threading.Thread(
+            target=_publisher_worker,
+            args=(settings, targets, {"source_x": object()}, stop_event, route_x),
+        )
+        publisher_y = threading.Thread(
+            target=_publisher_worker,
+            args=(settings, targets, {"source_y": object()}, stop_event, route_y),
+        )
+        try:
+            with patch("main._publish_route", side_effect=publish_route):
+                publisher_x.start()
+                publisher_y.start()
+                self.assertTrue(source_x_started.wait(timeout=1))
+                self.assertTrue(source_y_published.wait(timeout=1))
+                self.assertTrue(publisher_x.is_alive())
+        finally:
+            release_x.set()
+            stop_event.set()
+            publisher_x.join(timeout=2)
+            publisher_y.join(timeout=2)
 
 
 if __name__ == "__main__":

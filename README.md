@@ -56,7 +56,7 @@ python src/main.py
 ```
 
 Set `poll: false` to perform one scrape/publish pass and exit. Stop a continuous run with Ctrl+C.
-In continuous mode, scraping and publishing run on separate workers, so slow Telegram requests do not block queue publishing. One-shot mode scrapes first, then publishes the resulting queue.
+In continuous mode, scraping runs separately from publishing, and each configured channel has its own publisher worker. A channel's `send_delay_seconds` applies only between that channel's posts and does not delay other channels. One-shot mode scrapes first, then publishes the resulting queue.
 
 For deployment, run this command from a service manager such as systemd or Supervisor with the project root as its working directory. Keep `settings.yaml` on the host and ensure the service user can write to the configured database and log paths. The process handles `SIGINT` via Ctrl+C; use the service manager's normal stop/restart controls.
 
