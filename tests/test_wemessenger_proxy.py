@@ -155,7 +155,7 @@ class ScraperGuardTests(unittest.TestCase):
 
         self.assertEqual(posts[0]["text"], "پاراگراف اول\n😀\nپاراگراف بعدی")
 
-    def test_parser_expands_clickable_link_labels_to_urls(self):
+    def test_parser_puts_clickable_link_urls_on_separate_lines(self):
         html = (
             '<div class="tgme_widget_message" data-post="test/1">'
             '<div class="tgme_widget_message_text">'
@@ -169,7 +169,7 @@ class ScraperGuardTests(unittest.TestCase):
 
         self.assertEqual(
             posts[0]["text"],
-            "خبر مشاهده خبر: https://example.com/story متن بعدی\nhttps://example.com",
+            "خبر\nhttps://example.com/story متن بعدی\nhttps://example.com",
         )
 
     def test_parser_unwraps_telegram_link_redirects(self):
@@ -183,7 +183,7 @@ class ScraperGuardTests(unittest.TestCase):
 
         _, posts = _parse_page(html)
 
-        self.assertEqual(posts[0]["text"], "مشاهده خبر: https://example.com/story")
+        self.assertEqual(posts[0]["text"], "https://example.com/story")
 
     def test_scraper_skips_duplicate_before_saving_or_queueing(self):
         posts = [

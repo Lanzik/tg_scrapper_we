@@ -110,7 +110,7 @@ def _parse_message(message_el, *, max_media_per_post: int = 1) -> dict | None:
                 and label
                 and label.casefold() != href.casefold()
             ):
-                link.replace_with(f"{label}: {href}")
+                link.replace_with(f"{line_break_marker}{href}")
 
         for text_node in text_el.find_all(string=True):
             value = str(text_node).replace("\r\n", "\n").replace("\r", "\n")
