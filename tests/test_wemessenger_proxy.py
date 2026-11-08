@@ -18,7 +18,7 @@ from db import Database
 from main import _cleanup_completed_media, _publisher_worker, _scraper_worker
 from publisher import publish_posts_to_wemessenger
 import publisher as publisher_module
-from text_clean import clean_post_text
+from text_clean import clean_post_text, contains_excluded_term
 from wemessenger import WeMessengerClient
 from wm_client import build_wemessenger
 
@@ -108,6 +108,12 @@ class ScraperGuardTests(unittest.TestCase):
                 remove_trailing_urls=True,
             ),
             "مشاهده خبر: https://example.com/story",
+        )
+
+    def test_excluded_terms_match_persian_unicode_variants(self):
+        self.assertEqual(
+            contains_excluded_term("متن ک\u200cون و كُون", ["کون"]),
+            "کون",
         )
 
     def test_parser_limits_mixed_media_and_keeps_video_type(self):
@@ -358,6 +364,7 @@ class ChannelRouteTests(unittest.TestCase):
                 "send_delay_seconds": 20,
                 "retention_days": 60,
                 "remove_trailing_phrases": ["Global", "Link"],
+                "exclude_post_terms": ["global"],
                 "max_media_per_post": 2,
                 "download_media": False,
                 "deduplicate_posts": True,
@@ -383,10 +390,14 @@ class ChannelRouteTests(unittest.TestCase):
         self.assertEqual(first["footer_tag"], "@First")
         self.assertEqual(first["remove_trailing_phrases"], ["Link"])
         self.assertTrue(first["remove_trailing_urls"])
-        self.assertEqual(first["exclude_post_terms"], ["example", "advertisement"])
+        self.assertEqual(
+            first["exclude_post_terms"],
+            ["global", "example", "advertisement"],
+        )
         self.assertEqual(second["wemessenger_node"], "node-2")
         self.assertEqual(second["retention_days"], 60)
         self.assertEqual(second["remove_trailing_phrases"], ["Global", "Link"])
+        self.assertEqual(second["exclude_post_terms"], ["global"])
         self.assertEqual(settings["max_media_per_post"], 2)
         self.assertFalse(settings["download_media"])
         self.assertTrue(settings["deduplicate_posts"])
@@ -583,7 +594,7 @@ class DuplicatePublishTests(unittest.TestCase):
                     channel_id,
                     message_id=1,
                     date=None,
-                    text="This contains Example text",
+                    text="این متن ک\u200cون دارد",
                     views=None,
                     source="https://t.me/source/1",
                     scraped_at="2020-01-01T00:00:00+00:00",
@@ -596,7 +607,7 @@ class DuplicatePublishTests(unittest.TestCase):
                 [post_id],
                 publisher,
                 target="node",
-                exclude_post_terms=["example"],
+                exclude_post_terms=["کون"],
             )
 
             self.assertEqual(sent, 0)

@@ -17,14 +17,16 @@ def _match_form(value: str) -> str:
     return "".join(
         {"\u064a": "\u06cc", "\u0643": "\u06a9"}.get(character, character)
         for character in normalized
-        if unicodedata.category(character) != "Cf" and character != "\u0640"
+        if unicodedata.category(character) != "Cf"
+        and not unicodedata.category(character).startswith("M")
+        and character != "\u0640"
     )
 
 
 def contains_excluded_term(text: str, terms: list[str] | tuple[str, ...]) -> str | None:
-    normalized_text = unicodedata.normalize("NFKC", text or "").casefold()
+    normalized_text = _match_form(text or "")
     for term in terms:
-        normalized_term = unicodedata.normalize("NFKC", str(term)).strip().casefold()
+        normalized_term = _match_form(str(term)).strip()
         if normalized_term and normalized_term in normalized_text:
             return str(term)
     return None

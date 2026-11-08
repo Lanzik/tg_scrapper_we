@@ -39,7 +39,7 @@ remove_trailing_phrases: ["Link", "Follow us"]
 
 It removes the entire trailing line when it contains one of the configured phrases. A channel-level `remove_trailing_phrases` overrides the global list for that channel. `remove_trailing_urls: true` removes URLs from the end of a post. Persian ZWNJ and common Arabic/Persian Yeh/Kaf variants are normalized for phrase matching.
 
-Each channel can also define `exclude_post_terms`, for example `exclude_post_terms: ["example"]`. Matching is case-insensitive substring matching on post text. New matches are skipped before saving; existing queued matches are marked `filtered` and never sent. Filtered posts remain in the database for audit and can be removed later by normal retention.
+Set top-level `exclude_post_terms` to filter words across all channels, for example `exclude_post_terms: ["تبلیغ", "کون"]`. A channel-level `exclude_post_terms` adds terms to the global list for that channel. Matching is case-insensitive substring matching and ignores Persian/Arabic Kaf and Yeh variants, diacritics, and invisible joiner characters. New matches are skipped before saving; existing queued matches are marked `filtered` and never sent. Filtered posts remain in the database for audit and can be removed later by normal retention.
 
 `download_media` enables media downloads, and `max_media_per_post` limits how many images or videos are downloaded and published from each Telegram post. The limit defaults to `1`; selection follows the media order in the Telegram post. Set a higher value to keep and publish more items. The old `download_photos` key is still accepted. Videos are stored as files and uploaded using WeMessenger's video media type.
 

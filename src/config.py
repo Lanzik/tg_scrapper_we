@@ -86,18 +86,27 @@ def _parse_channel_routes(data: dict) -> list[dict]:
             if isinstance(entry, dict)
             else data.get("remove_trailing_urls", False)
         )
-        excluded_terms = (
-            entry.get("exclude_post_terms", data.get("exclude_post_terms", []))
-            if isinstance(entry, dict)
-            else data.get("exclude_post_terms", [])
+        global_excluded_terms = data.get("exclude_post_terms", [])
+        channel_excluded_terms = (
+            entry.get("exclude_post_terms", []) if isinstance(entry, dict) else []
         )
-        if isinstance(excluded_terms, str):
-            excluded_terms = [excluded_terms]
-        if not isinstance(excluded_terms, list):
-            raise SystemExit(f"`exclude_post_terms` for {channel} must be a list or string.")
-        route["exclude_post_terms"] = [
-            str(term).strip() for term in excluded_terms if str(term).strip()
-        ]
+        excluded_terms = []
+        for raw_terms in (global_excluded_terms, channel_excluded_terms):
+            if isinstance(raw_terms, str):
+                raw_terms = [raw_terms]
+            if not isinstance(raw_terms, list):
+                raise SystemExit(
+                    f"`exclude_post_terms` for {channel} must be a list or string."
+                )
+            excluded_terms.extend(raw_terms)
+        route["exclude_post_terms"] = []
+        seen_excluded_terms: set[str] = set()
+        for raw_term in excluded_terms:
+            term = str(raw_term).strip()
+            normalized_term = term.casefold()
+            if term and normalized_term not in seen_excluded_terms:
+                route["exclude_post_terms"].append(term)
+                seen_excluded_terms.add(normalized_term)
 
         for key, default in defaults.items():
             raw_value = entry.get(key, default) if isinstance(entry, dict) else default
