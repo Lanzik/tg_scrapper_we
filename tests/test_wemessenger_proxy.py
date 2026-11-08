@@ -122,6 +122,20 @@ class ScraperGuardTests(unittest.TestCase):
         _, posts = _parse_page(html, max_media_per_post=2)
         self.assertEqual([item["type"] for item in posts[0]["media"]], ["video", "image"])
 
+    def test_parser_keeps_emoji_inline_with_text(self):
+        html = """
+        <div class="tgme_widget_message" data-post="test/1">
+          <div class="tgme_widget_message_text">
+            <span>متن </span><tg-emoji>😀</tg-emoji><span> ادامه متن</span><br>
+            <span>خط دوم</span><tg-emoji>🔥</tg-emoji>
+          </div>
+        </div>
+        """
+
+        _, posts = _parse_page(html)
+
+        self.assertEqual(posts[0]["text"], "متن 😀 ادامه متن\nخط دوم🔥")
+
     def test_scraper_skips_duplicate_before_saving_or_queueing(self):
         posts = [
             {"id": 1, "date": None, "text": "Same post text", "views": None, "media": []},

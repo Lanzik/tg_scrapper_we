@@ -88,7 +88,16 @@ def _parse_message(message_el, *, max_media_per_post: int = 1) -> dict | None:
         return None
 
     text_el = message_el.select_one(".tgme_widget_message_text")
-    text = text_el.get_text("\n", strip=True) if text_el else ""
+    if text_el:
+        line_break_marker = "\ue000"
+        for line_break in text_el.find_all("br"):
+            line_break.replace_with(line_break_marker)
+        text = "\n".join(
+            re.sub(r"\s+", " ", line).strip()
+            for line in text_el.get_text("", strip=False).split(line_break_marker)
+        ).strip()
+    else:
+        text = ""
     media = _extract_media(message_el, max_media_per_post)
     if not text and not media:
         return None
