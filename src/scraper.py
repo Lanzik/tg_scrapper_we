@@ -92,6 +92,17 @@ def _parse_message(message_el, *, max_media_per_post: int = 1) -> dict | None:
         line_break_marker = "\ue000"
         for line_break in text_el.find_all("br"):
             line_break.replace_with(line_break_marker)
+
+        for link in text_el.find_all("a", href=True):
+            href = str(link.get("href") or "").strip()
+            label = re.sub(r"\s+", " ", link.get_text("", strip=False)).strip()
+            if (
+                href.lower().startswith(("http://", "https://"))
+                and label
+                and label.casefold() != href.casefold()
+            ):
+                link.replace_with(f"{label}: {href}")
+
         text = "\n".join(
             re.sub(r"\s+", " ", line).strip()
             for line in text_el.get_text("", strip=False).split(line_break_marker)
