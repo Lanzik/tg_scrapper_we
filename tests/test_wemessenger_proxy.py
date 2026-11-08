@@ -44,6 +44,20 @@ class ScraperGuardTests(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, "no channel content|challenge|bot"):
             _collect_posts(FakeClient(), "Khabar_Fouri", limit=10)
 
+    def test_collect_posts_treats_missing_channel_as_recoverable_error(self):
+        class FakeResponse:
+            status_code = 404
+
+            def raise_for_status(self):
+                return None
+
+        class FakeClient:
+            def get(self, _url):
+                return FakeResponse()
+
+        with self.assertRaisesRegex(RuntimeError, "not found or is not public"):
+            _collect_posts(FakeClient(), "missing_channel", limit=10)
+
     def test_channel_tag_is_preserved_as_final_line(self):
         self.assertEqual(
             clean_post_text("story\n@Source_Channel"),
@@ -253,6 +267,30 @@ class ChannelRouteTests(unittest.TestCase):
         self.assertEqual(settings["log_max_mb"], 7)
         self.assertEqual(settings["log_backup_count"], 3)
         self.assertTrue(settings["delete_media_after_publish"])
+
+    def test_load_settings_supports_mixed_individual_and_shared_destinations(self):
+        config_text = yaml.safe_dump(
+            {
+                "channels": [
+                    {"telegram": "@individual", "wemessenger_node": "node-1"},
+                    {"telegram": "@shared-one", "wemessenger_node": "node-2"},
+                    {"telegram": "@shared-two", "wemessenger_node": "node-2"},
+                ],
+                "wemessenger": {
+                    "enabled": True,
+                    "bot_token": "token",
+                },
+            }
+        )
+        with tempfile.TemporaryDirectory() as temp_dir:
+            settings_path = Path(temp_dir) / "settings.yaml"
+            settings_path.write_text(config_text, encoding="utf-8")
+            settings = load_settings(settings_path)
+
+        self.assertEqual(
+            [route["wemessenger_node"] for route in settings["channel_routes"]],
+            ["node-1", "node-2", "node-2"],
+        )
 
     def test_existing_photos_table_migrates_media_type(self):
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -725,6 +763,82 @@ class WorkerConcurrencyTests(unittest.TestCase):
             stop_event.set()
             publisher_x.join(timeout=2)
             publisher_y.join(timeout=2)
+
+    def test_publisher_workers_serialize_sends_to_the_same_destination(self):
+        route_x = {
+            "username": "source_x",
+            "telegram": "@source_x",
+            "publish_interval_seconds": 60,
+        }
+        route_y = {
+            "username": "source_y",
+            "telegram": "@source_y",
+            "publish_interval_seconds": 60,
+        }
+        settings = {"channel_routes": [route_x, route_y]}
+        targets = {"source_x": "shared-node", "source_y": "shared-node"}
+        target_locks = {"shared-node": threading.Lock()}
+        stop_event = threading.Event()
+        source_x_started = threading.Event()
+        release_x = threading.Event()
+        source_y_published = threading.Event()
+        active_sends = 0
+        max_active_sends = 0
+        state_lock = threading.Lock()
+
+        def publish_route(_settings, route, _target, _client):
+            nonlocal active_sends, max_active_sends
+            with state_lock:
+                active_sends += 1
+                max_active_sends = max(max_active_sends, active_sends)
+            try:
+                if route["username"] == "source_x":
+                    source_x_started.set()
+                    release_x.wait(timeout=3)
+                else:
+                    source_y_published.set()
+                    stop_event.set()
+            finally:
+                with state_lock:
+                    active_sends -= 1
+
+        publisher_x = threading.Thread(
+            target=_publisher_worker,
+            args=(
+                settings,
+                targets,
+                {"source_x": object()},
+                stop_event,
+                route_x,
+                target_locks,
+            ),
+        )
+        publisher_y = threading.Thread(
+            target=_publisher_worker,
+            args=(
+                settings,
+                targets,
+                {"source_y": object()},
+                stop_event,
+                route_y,
+                target_locks,
+            ),
+        )
+        try:
+            with patch("main._publish_route", side_effect=publish_route):
+                publisher_x.start()
+                self.assertTrue(source_x_started.wait(timeout=1))
+                publisher_y.start()
+                self.assertFalse(source_y_published.wait(timeout=0.1))
+                release_x.set()
+                self.assertTrue(source_y_published.wait(timeout=1))
+        finally:
+            release_x.set()
+            stop_event.set()
+            publisher_x.join(timeout=2)
+            publisher_y.join(timeout=2)
+
+        self.assertEqual(max_active_sends, 1)
 
 
 if __name__ == "__main__":

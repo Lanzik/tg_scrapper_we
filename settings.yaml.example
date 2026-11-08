@@ -1,6 +1,6 @@
 channels:
   - telegram: "@Khabar_Fouri"
-    wemessenger_node: "PASTE_FIRST_CHANNEL_UUID"
+    wemessenger_node: "PASTE_SHARED_CHANNEL_UUID"
     footer_tag: "@Khabar_Fouri"
     remove_trailing_phrases: ["Link"]
     remove_trailing_urls: true
@@ -11,7 +11,7 @@ channels:
     retention_days: 30
 
   - telegram: "@khabaronline_ir"
-    wemessenger_node: "PASTE_SECOND_CHANNEL_UUID"
+    wemessenger_node: "PASTE_SHARED_CHANNEL_UUID"
     poll_interval_seconds: 60
     publish_interval_seconds: 30
     send_delay_seconds: 30

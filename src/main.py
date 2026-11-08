@@ -164,14 +164,22 @@ def _publisher_worker(
     clients: dict,
     stop_event: threading.Event,
     route: dict,
+    target_locks: dict[str, threading.Lock] | None = None,
 ) -> None:
     username = route["username"]
     next_publish = 0.0
+    target_lock = (target_locks or {}).get(targets[username])
 
     while not stop_event.is_set():
         if time.monotonic() >= next_publish:
             try:
-                _publish_route(settings, route, targets[username], clients[username])
+                if target_lock is None:
+                    _publish_route(settings, route, targets[username], clients[username])
+                else:
+                    with target_lock:
+                        _publish_route(
+                            settings, route, targets[username], clients[username]
+                        )
             except Exception:
                 logger.exception("publish failed for %s", route["telegram"])
             next_publish = time.monotonic() + route["publish_interval_seconds"]
@@ -240,6 +248,7 @@ def main() -> None:
         return
 
     stop_event = threading.Event()
+    target_locks = {target: threading.Lock() for target in set(targets.values())}
     workers = [
         threading.Thread(
             target=_scraper_worker,
@@ -251,7 +260,7 @@ def main() -> None:
         workers.extend(
             threading.Thread(
                 target=_publisher_worker,
-                args=(settings, targets, clients, stop_event, route),
+                args=(settings, targets, clients, stop_event, route, target_locks),
                 name=f"wemessenger-publisher-{route['username']}",
             )
             for route in settings["channel_routes"]

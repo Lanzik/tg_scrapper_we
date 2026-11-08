@@ -196,7 +196,7 @@ def _collect_posts(
 
         response = client.get(url)
         if response.status_code == 404:
-            raise SystemExit(
+            raise RuntimeError(
                 f"Channel @{username} not found or is not public.\n"
                 "This scraper only works with public channels (t.me/s/...)."
             )

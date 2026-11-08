@@ -11,7 +11,7 @@ pip install -r requirements.txt
 cp settings.yaml.example settings.yaml
 ```
 
-Edit `settings.yaml`. Each `channels` entry maps one Telegram source to one WeMessenger node and can set its own schedule and retention period:
+Edit `settings.yaml`. Each `channels` entry maps one Telegram source to one WeMessenger node and can set its own schedule and retention period. Entries can use different destinations, or share a destination when several Telegram sources should publish to the same WeMessenger channel:
 
 ```yaml
 channels:
@@ -21,7 +21,13 @@ channels:
     publish_interval_seconds: 15
     send_delay_seconds: 20
     retention_days: 30
+  - telegram: "@source_two"
+    wemessenger_node: "ANOTHER_WE_CHANNEL_NODE_UUID"
+  - telegram: "@source_three"
+    wemessenger_node: "ANOTHER_WE_CHANNEL_NODE_UUID"
 ```
+
+In this example, `@source_one` publishes to its own WeMessenger channel, while `@source_two` and `@source_three` both publish to another one. Sources sharing a destination are published sequentially.
 
 `poll_interval_seconds` is the pause between Telegram checks. `publish_interval_seconds` is the pause between attempts to drain that source's queue. `send_delay_seconds` is the pause between messages in a publishing batch. `retention_days` deletes posts older than that many days, measured from when they were scraped; set it to `0` to keep data indefinitely. Deleting a post also deletes its photos and queue rows.
 
