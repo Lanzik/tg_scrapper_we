@@ -61,11 +61,22 @@ class WeMessengerClient:
             "session_id": self.session_id,
         }
 
-    def _trim_text(self, text: str) -> str:
+    def _split_text(self, text: str) -> list[str]:
         body = (text or "").strip()
-        if len(body) > TEXT_LIMIT:
-            return body[: TEXT_LIMIT - 1] + "…"
-        return body
+        chunks: list[str] = []
+        while len(body) > TEXT_LIMIT:
+            split_at = body.rfind("\n", 0, TEXT_LIMIT + 1)
+            if split_at <= 0:
+                split_at = body.rfind(" ", 0, TEXT_LIMIT + 1)
+            if split_at <= 0:
+                split_at = TEXT_LIMIT
+            else:
+                split_at += 1
+            chunks.append(body[:split_at])
+            body = body[split_at:]
+        if body:
+            chunks.append(body)
+        return chunks
 
     def _send(self, client: httpx.Client, payload: dict[str, Any]) -> dict[str, Any]:
         url = f"{self.api_base}/v2/{self.bot_token}/sendMessage"
@@ -81,6 +92,17 @@ class WeMessengerClient:
                 f"sendMessage HTTP {response.status_code}: {body_text[:500] or data}"
             )
         return data if isinstance(data, dict) else {"raw": data}
+
+    def _send_text_chunk(self, client: httpx.Client, body: str) -> dict[str, Any]:
+        logger.info("WeMessenger send text (%d chars)", len(body))
+        return self._send(
+            client,
+            {
+                "to": self._destination(),
+                "text": {"text": body},
+                "packet_id": str(uuid.uuid4()),
+            },
+        )
 
     def get_auth_token(self, client: httpx.Client) -> str:
         url = f"{self.api_base}/v2/{self.bot_token}/getAuthToken"
@@ -139,19 +161,20 @@ class WeMessengerClient:
         return file_obj
 
     def send_text(self, client: httpx.Client, text: str) -> dict[str, Any]:
-        body = self._trim_text(text)
-        if not body:
+        chunks = self._split_text(text)
+        if not chunks:
             raise ValueError("text is empty")
 
-        logger.info("WeMessenger send text (%d chars)", len(body))
-        return self._send(
-            client,
-            {
-                "to": self._destination(),
-                "text": {"text": body},
-                "packet_id": str(uuid.uuid4()),
-            },
-        )
+        response: dict[str, Any] = {}
+        for index, body in enumerate(chunks, start=1):
+            logger.info(
+                "WeMessenger send text chunk %s/%s (%d chars)",
+                index,
+                len(chunks),
+                len(body),
+            )
+            response = self._send_text_chunk(client, body)
+        return response
 
     def send_image(
         self,
@@ -217,7 +240,11 @@ class WeMessengerClient:
                 file_obj[key] = value
 
         if caption and caption.strip():
-            file_obj["caption"] = self._trim_text(caption)
+            if len(caption) > TEXT_LIMIT:
+                raise ValueError(
+                    f"caption exceeds WeMessenger limit of {TEXT_LIMIT} characters"
+                )
+            file_obj["caption"] = caption
 
         logger.info(
             "WeMessenger send %s file=%s caption=%s sign=%s",
@@ -258,6 +285,7 @@ class WeMessengerClient:
             trust_env=False,
             proxy=self.proxy,
         ) as client:
+            text_chunks = self._split_text(caption or "")
             if media:
                 first_bytes, first_name, first_type = media[0]
                 self.send_media(
@@ -265,8 +293,10 @@ class WeMessengerClient:
                     content=first_bytes,
                     filename=first_name,
                     media_type=first_type,
-                    caption=caption,
+                    caption=text_chunks[0] if text_chunks else None,
                 )
+                for chunk in text_chunks[1:]:
+                    self._send_text_chunk(client, chunk)
                 for content, filename, media_type in media[1:]:
                     self.send_media(
                         client,
@@ -277,8 +307,8 @@ class WeMessengerClient:
                     )
                 return
 
-            if caption:
-                self.send_text(client, caption)
+            if text_chunks:
+                self.send_text(client, caption or "")
                 return
 
             raise ValueError("post has neither text nor media")

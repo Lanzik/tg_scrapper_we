@@ -72,7 +72,12 @@ def clean_post_text(
 
         cleaned = last
         if remove_trailing_urls:
-            cleaned = _URL.sub("", cleaned)
+            def remove_unlabeled_url(match: re.Match[str]) -> str:
+                if cleaned[:match.start()].rstrip().endswith(":"):
+                    return match.group()
+                return ""
+
+            cleaned = _URL.sub(remove_unlabeled_url, cleaned)
         cleaned = cleaned.strip(" \t|,-")
         if cleaned != last:
             if cleaned:

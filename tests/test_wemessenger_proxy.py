@@ -102,6 +102,13 @@ class ScraperGuardTests(unittest.TestCase):
             ),
             "خبر",
         )
+        self.assertEqual(
+            clean_post_text(
+                "مشاهده خبر: https://example.com/story",
+                remove_trailing_urls=True,
+            ),
+            "مشاهده خبر: https://example.com/story",
+        )
 
     def test_parser_limits_mixed_media_and_keeps_video_type(self):
         html = """
@@ -164,6 +171,19 @@ class ScraperGuardTests(unittest.TestCase):
             posts[0]["text"],
             "خبر مشاهده خبر: https://example.com/story متن بعدی\nhttps://example.com",
         )
+
+    def test_parser_unwraps_telegram_link_redirects(self):
+        html = (
+            '<div class="tgme_widget_message" data-post="test/1">'
+            '<div class="tgme_widget_message_text">'
+            '<a href="https://t.me/iv?url=https%3A%2F%2Fexample.com%2Fstory&amp;rhash=abc">'
+            "مشاهده خبر</a>"
+            "</div></div>"
+        )
+
+        _, posts = _parse_page(html)
+
+        self.assertEqual(posts[0]["text"], "مشاهده خبر: https://example.com/story")
 
     def test_scraper_skips_duplicate_before_saving_or_queueing(self):
         posts = [
@@ -250,6 +270,52 @@ class WemessengerProxyTests(unittest.TestCase):
 
         self.assertEqual(sent["file"]["type"], "video")
         self.assertEqual(sent["file"]["caption"], "video caption")
+
+    def test_long_text_is_sent_in_full_across_multiple_messages(self):
+        client = WeMessengerClient("token", "node")
+        sent = []
+        client._send = lambda _client, payload: sent.append(payload["text"]["text"]) or {}
+        text = ("خبر و متن کامل " * 400) + "\nپایان پیام"
+        http_client = MagicMock()
+        http_client.__enter__.return_value = http_client
+
+        with patch("wemessenger.httpx.Client", return_value=http_client):
+            client.send_post(text=text)
+
+        self.assertGreater(len(sent), 1)
+        self.assertTrue(all(len(chunk) <= 4096 for chunk in sent))
+        self.assertEqual("".join(sent), text.strip())
+        self.assertNotIn("…", "".join(sent))
+
+    def test_long_media_caption_continues_as_text_messages(self):
+        client = WeMessengerClient("token", "node")
+        sent = []
+        client.upload_file = lambda _client, **kwargs: {
+            "uuid": "media-id",
+            "size": 12,
+            "type": kwargs["file_type"],
+        }
+
+        def capture_send(_client, payload):
+            sent.append(payload)
+            return {}
+
+        client._send = capture_send
+        text = ("کپشن کامل " * 500) + "پایان"
+        http_client = MagicMock()
+        http_client.__enter__.return_value = http_client
+
+        with patch("wemessenger.httpx.Client", return_value=http_client):
+            client.send_post(
+                text=text,
+                media=[(b"image-bytes", "photo.jpg", "image")],
+            )
+
+        chunks = [sent[0]["file"]["caption"]]
+        chunks.extend(payload["text"]["text"] for payload in sent[1:])
+        self.assertGreater(len(chunks), 1)
+        self.assertTrue(all(len(chunk) <= 4096 for chunk in chunks))
+        self.assertEqual("".join(chunks), text.strip())
 
 
 class ChannelRouteTests(unittest.TestCase):

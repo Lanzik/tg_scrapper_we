@@ -5,7 +5,7 @@ from __future__ import annotations
 import re
 from datetime import datetime, timezone
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import parse_qs, urlparse
 
 import httpx
 from bs4 import BeautifulSoup
@@ -95,6 +95,15 @@ def _parse_message(message_el, *, max_media_per_post: int = 1) -> dict | None:
 
         for link in text_el.find_all("a", href=True):
             href = str(link.get("href") or "").strip()
+            parsed_href = urlparse(href)
+            is_telegram_redirect = (
+                parsed_href.netloc.lower() in {"t.me", "www.t.me"}
+                and parsed_href.path == "/iv"
+            )
+            if is_telegram_redirect:
+                redirect_target = parse_qs(parsed_href.query).get("url", [""])[0].strip()
+                if redirect_target.lower().startswith(("http://", "https://")):
+                    href = redirect_target
             label = re.sub(r"\s+", " ", link.get_text("", strip=False)).strip()
             if (
                 href.lower().startswith(("http://", "https://"))
