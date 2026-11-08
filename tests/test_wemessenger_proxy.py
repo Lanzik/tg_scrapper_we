@@ -155,6 +155,22 @@ class ScraperGuardTests(unittest.TestCase):
 
         self.assertEqual(posts[0]["text"], "پاراگراف اول\n😀\nپاراگراف بعدی")
 
+    def test_parser_keeps_photo_caption_from_alternate_markup(self):
+        html = (
+            '<div class="tgme_widget_message" data-post="test/1">'
+            '<a class="tgme_widget_message_photo_wrap" '
+            'style="background-image:url(https://cdn.test/photo.jpg)"></a>'
+            '<div class="tgme_widget_message_caption">'
+            '<span>تیم </span><tg-emoji><img alt="⚽"></tg-emoji>'
+            '<span> پیروز شد</span>'
+            "</div></div>"
+        )
+
+        _, posts = _parse_page(html)
+
+        self.assertEqual(posts[0]["text"], "تیم ⚽ پیروز شد")
+        self.assertEqual(posts[0]["media"][0]["type"], "image")
+
     def test_parser_puts_clickable_link_urls_on_separate_lines(self):
         html = (
             '<div class="tgme_widget_message" data-post="test/1">'

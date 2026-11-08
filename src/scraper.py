@@ -87,11 +87,18 @@ def _parse_message(message_el, *, max_media_per_post: int = 1) -> dict | None:
     except ValueError:
         return None
 
-    text_el = message_el.select_one(".tgme_widget_message_text")
+    text_el = message_el.select_one(
+        ".tgme_widget_message_text, "
+        ".tgme_widget_message_caption, "
+        ".tgme_widget_message_media_caption"
+    )
     if text_el:
         line_break_marker = "\ue000"
         for line_break in text_el.find_all("br"):
             line_break.replace_with(line_break_marker)
+
+        for emoji_image in text_el.select("tg-emoji img[alt], img.emoji[alt]"):
+            emoji_image.replace_with(str(emoji_image.get("alt") or ""))
 
         for link in text_el.find_all("a", href=True):
             href = str(link.get("href") or "").strip()
