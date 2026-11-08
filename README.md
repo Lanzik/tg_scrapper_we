@@ -31,7 +31,13 @@ In this example, `@source_one` publishes to its own WeMessenger channel, while `
 
 `poll_interval_seconds` is the pause between Telegram checks. `publish_interval_seconds` is the pause between attempts to drain that source's queue. `send_delay_seconds` is the pause between messages in a publishing batch. `retention_days` deletes posts older than that many days, measured from when they were scraped; set it to `0` to keep data indefinitely. Deleting a post also deletes its photos and queue rows.
 
-Each channel can set `footer_tag` to ensure its tag appears once on a separate final line. `remove_trailing_phrases` removes the entire trailing line when it contains a configured label such as `Link`, and `remove_trailing_urls: true` removes URLs from the end of a post. Persian ZWNJ and common Arabic/Persian Yeh/Kaf variants are normalized for phrase matching. These cleanup options can also be set globally as defaults.
+Each channel can set `footer_tag` to ensure its tag appears once on a separate final line. Set `remove_trailing_phrases` at the top level to apply the same list to every channel, without repeating it on each entry:
+
+```yaml
+remove_trailing_phrases: ["Link", "Follow us"]
+```
+
+It removes the entire trailing line when it contains one of the configured phrases. A channel-level `remove_trailing_phrases` overrides the global list for that channel. `remove_trailing_urls: true` removes URLs from the end of a post. Persian ZWNJ and common Arabic/Persian Yeh/Kaf variants are normalized for phrase matching.
 
 Each channel can also define `exclude_post_terms`, for example `exclude_post_terms: ["example"]`. Matching is case-insensitive substring matching on post text. New matches are skipped before saving; existing queued matches are marked `filtered` and never sent. Filtered posts remain in the database for audit and can be removed later by normal retention.
 

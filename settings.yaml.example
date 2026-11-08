@@ -2,7 +2,6 @@ channels:
   - telegram: "@Khabar_Fouri"
     wemessenger_node: "PASTE_SHARED_CHANNEL_UUID"
     footer_tag: "@Khabar_Fouri"
-    remove_trailing_phrases: ["Link"]
     remove_trailing_urls: true
     exclude_post_terms: ["example"]
     poll_interval_seconds: 30
@@ -30,6 +29,7 @@ poll_interval: 10
 publish_interval: 15
 send_delay_seconds: 20
 retention_days: 0 # 0 disables automatic deletion
+remove_trailing_phrases: ["Link"] # applied to all channels unless overridden per channel
 
 log_file: logs/scrape.log
 log_level: INFO

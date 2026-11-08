@@ -232,6 +232,7 @@ class ChannelRouteTests(unittest.TestCase):
                 "publish_interval": 15,
                 "send_delay_seconds": 20,
                 "retention_days": 60,
+                "remove_trailing_phrases": ["Global", "Link"],
                 "max_media_per_post": 2,
                 "download_media": False,
                 "deduplicate_posts": True,
@@ -260,6 +261,7 @@ class ChannelRouteTests(unittest.TestCase):
         self.assertEqual(first["exclude_post_terms"], ["example", "advertisement"])
         self.assertEqual(second["wemessenger_node"], "node-2")
         self.assertEqual(second["retention_days"], 60)
+        self.assertEqual(second["remove_trailing_phrases"], ["Global", "Link"])
         self.assertEqual(settings["max_media_per_post"], 2)
         self.assertFalse(settings["download_media"])
         self.assertTrue(settings["deduplicate_posts"])
