@@ -103,9 +103,20 @@ def _parse_message(message_el, *, max_media_per_post: int = 1) -> dict | None:
             ):
                 link.replace_with(f"{label}: {href}")
 
+        for text_node in text_el.find_all(string=True):
+            value = str(text_node).replace("\r\n", "\n").replace("\r", "\n")
+            if not value.strip():
+                whitespace = "\n" * value.count("\n") if "\n" in value else " "
+                text_node.replace_with(whitespace)
+            else:
+                text_node.replace_with(re.sub(r"[^\S\n]+", " ", value))
+
         text = "\n".join(
-            re.sub(r"\s+", " ", line).strip()
-            for line in text_el.get_text("", strip=False).split(line_break_marker)
+            "\n".join(
+                re.sub(r"[^\S\n]+", " ", line).strip()
+                for line in chunk.split("\n")
+            )
+            for chunk in text_el.get_text("", strip=False).split(line_break_marker)
         ).strip()
     else:
         text = ""

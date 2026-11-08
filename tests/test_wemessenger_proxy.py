@@ -123,29 +123,40 @@ class ScraperGuardTests(unittest.TestCase):
         self.assertEqual([item["type"] for item in posts[0]["media"]], ["video", "image"])
 
     def test_parser_keeps_emoji_inline_with_text(self):
-        html = """
-        <div class="tgme_widget_message" data-post="test/1">
-          <div class="tgme_widget_message_text">
-            <span>متن </span><tg-emoji>😀</tg-emoji><span> ادامه متن</span><br>
-            <span>خط دوم</span><tg-emoji>🔥</tg-emoji>
-          </div>
-        </div>
-        """
+        html = (
+            '<div class="tgme_widget_message" data-post="test/1">'
+            '<div class="tgme_widget_message_text">'
+            '<span>متن </span><tg-emoji>😀</tg-emoji><span> ادامه متن</span>'
+            '<br><span>خط دوم</span><tg-emoji>🔥</tg-emoji>'
+            "</div></div>"
+        )
 
         _, posts = _parse_page(html)
 
         self.assertEqual(posts[0]["text"], "متن 😀 ادامه متن\nخط دوم🔥")
 
+    def test_parser_preserves_newline_before_emoji_paragraph(self):
+        html = (
+            '<div class="tgme_widget_message" data-post="test/1">'
+            '<div class="tgme_widget_message_text">'
+            '<span>پاراگراف اول</span>\n  <tg-emoji>😀</tg-emoji>'
+            '\n<span>پاراگراف بعدی</span>'
+            "</div></div>"
+        )
+
+        _, posts = _parse_page(html)
+
+        self.assertEqual(posts[0]["text"], "پاراگراف اول\n😀\nپاراگراف بعدی")
+
     def test_parser_expands_clickable_link_labels_to_urls(self):
-        html = """
-        <div class="tgme_widget_message" data-post="test/1">
-          <div class="tgme_widget_message_text">
-            <span>خبر </span><a href="https://example.com/story">مشاهده خبر</a>
-            <span> متن بعدی</span><br>
-            <a href="https://example.com">https://example.com</a>
-          </div>
-        </div>
-        """
+        html = (
+            '<div class="tgme_widget_message" data-post="test/1">'
+            '<div class="tgme_widget_message_text">'
+            '<span>خبر </span><a href="https://example.com/story">مشاهده خبر</a>'
+            '<span> متن بعدی</span><br>'
+            '<a href="https://example.com">https://example.com</a>'
+            "</div></div>"
+        )
 
         _, posts = _parse_page(html)
 
