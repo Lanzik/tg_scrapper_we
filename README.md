@@ -39,9 +39,15 @@ remove_trailing_phrases: ["Link", "Follow us"]
 
 It removes the entire trailing line when it contains one of the configured phrases. A channel-level `remove_trailing_phrases` overrides the global list for that channel. `remove_trailing_urls: true` removes URLs from the end of a post. Persian ZWNJ and common Arabic/Persian Yeh/Kaf variants are normalized for phrase matching.
 
-Set top-level `exclude_post_terms` to filter words across all channels, for example `exclude_post_terms: ["تبلیغ", "کون"]`. A channel-level `exclude_post_terms` adds terms to the global list for that channel. Matching is case-insensitive substring matching and ignores Persian/Arabic Kaf and Yeh variants, diacritics, and invisible joiner characters. New matches are skipped before saving; existing queued matches are marked `filtered` and never sent. Filtered posts remain in the database for audit and can be removed later by normal retention.
+Set top-level `exclude_post_terms` to filter words across all channels, for example `exclude_post_terms: ["تبلیغ", ""]`. A channel-level `exclude_post_terms` adds terms to the global list for that channel. Matching is case-insensitive substring matching and ignores Persian/Arabic Kaf and Yeh variants, diacritics, and invisible joiner characters. New matches are skipped before saving; existing queued matches are marked `filtered` and never sent. Filtered posts remain in the database for audit and can be removed later by normal retention.
 
 `download_media` enables media downloads, and `max_media_per_post` limits how many images or videos are downloaded and published from each Telegram post. The limit defaults to `1`; selection follows the media order in the Telegram post. Set a higher value to keep and publish more items. The old `download_photos` key is still accepted. Videos are stored as files and uploaded using WeMessenger's video media type.
+
+Selected media is required for publication: failed or missing downloads are retried when publishing, using the scraper's Telegram proxy settings, and uploads are attempted up to three times. If media is still unavailable, the post remains failed in the queue rather than publishing its caption alone; later queue runs retry it. With `download_media: false`, media is downloaded on demand during publication instead of during scraping. Only media selected by `max_media_per_post` is sent.
+
+Older queued posts whose media download failed before this behavior was added may have no saved media metadata; their missing media cannot be detected or recovered from the database alone.
+
+For Telegram replies, the bridge publishes the reply's own text or caption, not the potentially truncated preview of the message being replied to.
 
 `deduplicate_posts: true` (default) skips posts whose normalized text has already been stored, including across configured Telegram channels. For posts with no text, the checker compares media type and URL. Duplicate posts are skipped before saving or queueing, so they are not published. Set it to `false` to disable the check.
 

@@ -67,6 +67,7 @@ def main() -> None:
             settings["database"],
             client,
             send_delay_seconds=settings["send_delay_seconds"],
+            telegram_proxy=settings["telegram_proxy"] if settings["scraper_use_proxy"] else None,
         )
         logger.info("Done. Published %s/%s", sent, total)
         return
@@ -92,6 +93,7 @@ def main() -> None:
                         settings["database"],
                         client,
                         send_delay_seconds=settings["send_delay_seconds"],
+                        telegram_proxy=settings["telegram_proxy"] if settings["scraper_use_proxy"] else None,
                     )
                     logger.info("Published %s/%s this round", sent, total)
                 except Exception as exc:

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 import re
 from datetime import datetime, timezone
 from pathlib import Path
@@ -15,6 +16,7 @@ from db import Database
 from text_clean import contains_excluded_term
 
 PHOTO_URL_RE = re.compile(r"url\(['\"]?(https?://[^'\")\s]+)['\"]?\)")
+logger = logging.getLogger(__name__)
 
 
 def normalize_username(channel: str) -> str:
@@ -66,11 +68,18 @@ def _extract_media(message_el, limit: int) -> list[dict[str, str]]:
                 or element.get("data-video-url")
                 or element.get("src")
             )
+            if not url:
+                video = element.select_one("video[src], video[data-src], video source[src], video source[data-src]")
+                if video:
+                    url = video.get("src") or video.get("data-src")
 
-        if not url or not url.startswith(("http://", "https://")) or url in seen:
+        if not url or not url.startswith(("http://", "https://")):
+            media.append({"type": media_type, "url": ""})
+        elif url in seen:
             continue
-        media.append({"type": media_type, "url": url})
-        seen.add(url)
+        else:
+            media.append({"type": media_type, "url": url})
+            seen.add(url)
         if len(media) >= limit:
             break
     return media
@@ -87,10 +96,18 @@ def _parse_message(message_el, *, max_media_per_post: int = 1) -> dict | None:
     except ValueError:
         return None
 
-    text_el = message_el.select_one(
-        ".tgme_widget_message_text, "
-        ".tgme_widget_message_caption, "
-        ".tgme_widget_message_media_caption"
+    text_el = next(
+        (
+            element
+            for element in message_el.select(
+                ".tgme_widget_message_text, "
+                ".tgme_widget_message_caption, "
+                ".tgme_widget_message_media_caption"
+            )
+            if "js-message_reply_text" not in element.get("class", [])
+            and not element.find_parent(class_="tgme_widget_message_reply")
+        ),
+        None,
     )
     if text_el:
         line_break_marker = "\ue000"
@@ -205,18 +222,26 @@ def _download_bytes(
     url: str,
     *,
     media_type: str = "image",
-) -> tuple[bytes | None, str]:
+) -> tuple[bytes, str]:
     """Return (content, preferred_suffix)."""
-    try:
-        response = client.get(url)
-        response.raise_for_status()
-        suffix = Path(urlparse(url).path).suffix.lower()
-        allowed = {".mp4", ".m4v", ".mov", ".webm", ".mkv"} if media_type == "video" else {".jpg", ".jpeg", ".png", ".webp", ".gif"}
-        if suffix not in allowed:
-            suffix = ".mp4" if media_type == "video" else ".jpg"
-        return response.content, suffix
-    except httpx.HTTPError:
-        return None, ".mp4" if media_type == "video" else ".jpg"
+    if not url:
+        raise ValueError("media URL is missing")
+    for attempt in range(1, 4):
+        try:
+            response = client.get(url)
+            response.raise_for_status()
+            if not response.content:
+                raise ValueError("media download returned empty content")
+            suffix = Path(urlparse(url).path).suffix.lower()
+            allowed = {".mp4", ".m4v", ".mov", ".webm", ".mkv"} if media_type == "video" else {".jpg", ".jpeg", ".png", ".webp", ".gif"}
+            if suffix not in allowed:
+                suffix = ".mp4" if media_type == "video" else ".jpg"
+            return response.content, suffix
+        except (httpx.HTTPError, ValueError) as exc:
+            logger.warning("media download attempt %s/3 failed: %s", attempt, exc)
+            if attempt == 3:
+                raise RuntimeError(f"media download failed after 3 attempts: {exc}") from exc
+    raise AssertionError("unreachable")
 
 
 def _collect_posts(
@@ -314,50 +339,50 @@ def _save_post(
     download_photos: bool,
     max_media_per_post: int,
     scraped_at: str,
+    target: str,
 ) -> int:
-    post_id = db.upsert_post(
-        channel_id,
-        message_id=post["id"],
-        date=post["date"],
-        text=post["text"] or "",
-        views=post["views"],
-        source=f"https://t.me/{username}/{post['id']}",
-        scraped_at=scraped_at,
-        media=post.get("media", []),
-    )
-
     media_rows: list[dict] = []
     media_items = post.get("media", [])[:max_media_per_post]
-    if download_photos and media_items:
+    if media_items:
         post_media = media_dir / str(post["id"])
-        post_media.mkdir(parents=True, exist_ok=True)
+        if download_photos:
+            post_media.mkdir(parents=True, exist_ok=True)
 
         for i, media in enumerate(media_items, start=1):
             media_type = media["type"]
-            content, suffix = _download_bytes(
-                client,
-                media["url"],
-                media_type=media_type,
-            )
-            if content is None:
-                continue
+            row = {
+                "position": i,
+                "url": media["url"],
+                "media_type": media_type,
+            }
+            if download_photos:
+                try:
+                    content, suffix = _download_bytes(client, media["url"], media_type=media_type)
+                except (RuntimeError, ValueError) as exc:
+                    logger.error("media for telegram #%s unavailable: %s", post["id"], exc)
+                else:
+                    prefix = "video" if media_type == "video" else "photo"
+                    name = f"{prefix}_{i}{suffix}" if len(media_items) > 1 else f"{prefix}{suffix}"
+                    file_path = post_media / name
+                    file_path.write_bytes(content)
+                    row["file_path"] = str(file_path.relative_to(DATA_DIR.parent))
+                    row["image"] = content if media_type == "image" else None
+            media_rows.append(row)
 
-            prefix = "video" if media_type == "video" else "photo"
-            name = f"{prefix}_{i}{suffix}" if len(media_items) > 1 else f"{prefix}{suffix}"
-            file_path = post_media / name
-            file_path.write_bytes(content)
-
-            media_rows.append(
-                {
-                    "position": i,
-                    "url": media["url"],
-                    "file_path": str(file_path.relative_to(DATA_DIR.parent)),
-                    "media_type": media_type,
-                    "image": content if media_type == "image" else None,
-                }
-            )
-
-    db.replace_photos(post_id, media_rows)
+    with db.conn:
+        post_id = db.upsert_post(
+            channel_id,
+            message_id=post["id"],
+            date=post["date"],
+            text=post["text"] or "",
+            views=post["views"],
+            source=f"https://t.me/{username}/{post['id']}",
+            scraped_at=scraped_at,
+            media=post.get("media", []),
+            commit=False,
+        )
+        db.replace_photos(post_id, media_rows, commit=False)
+        db.enqueue_for_publish(post_id, target=target, commit=False)
 
     preview = (post["text"] or "[media only]")[:80].replace("\n", " ")
     media_note = f" (+{len(media_rows)} media)" if media_rows else ""
@@ -459,9 +484,8 @@ def scrape_channel(
                     download_photos=download_photos,
                     max_media_per_post=max_media_per_post,
                     scraped_at=scraped_at,
+                    target=target,
                 )
-                # Persist on unpublished queue until WeMessenger send succeeds
-                db.enqueue_for_publish(post_row_id, target=target)
                 saved_ids.append(post_row_id)
 
             queue = db.count_channel_queue(target, username)

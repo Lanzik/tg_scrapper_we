@@ -104,6 +104,7 @@ def _publish_route(settings: dict, route: dict, target: str, client) -> None:
         remove_trailing_phrases=route["remove_trailing_phrases"],
         remove_trailing_urls=route["remove_trailing_urls"],
         exclude_post_terms=route["exclude_post_terms"],
+        telegram_proxy=settings["telegram_proxy"] if settings["scraper_use_proxy"] else None,
     )
     if pending:
         logger.info("published %s/%s post(s) from %s", sent, pending, route["telegram"])

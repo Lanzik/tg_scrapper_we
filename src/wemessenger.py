@@ -219,13 +219,34 @@ class WeMessengerClient:
     ) -> dict[str, Any]:
         if media_type not in {"image", "video"}:
             raise ValueError(f"Unsupported WeMessenger media type: {media_type}")
-        uploaded = self.upload_file(
-            client,
-            content=content,
-            filename=filename,
-            file_type=media_type,
+        uploaded = self._upload_media(client, content, filename, media_type)
+        return self._send_uploaded_media(
+            client, uploaded=uploaded, filename=filename, media_type=media_type, caption=caption
         )
 
+    def _upload_media(
+        self, client: httpx.Client, content: bytes, filename: str, media_type: str
+    ) -> dict[str, Any]:
+        for attempt in range(1, 4):
+            try:
+                return self.upload_file(
+                    client, content=content, filename=filename, file_type=media_type
+                )
+            except (httpx.HTTPError, RuntimeError) as exc:
+                logger.warning("media upload %s attempt %s/3 failed: %s", filename, attempt, exc)
+                if attempt == 3:
+                    raise RuntimeError(f"media upload failed after 3 attempts: {exc}") from exc
+        raise AssertionError("unreachable")
+
+    def _send_uploaded_media(
+        self,
+        client: httpx.Client,
+        *,
+        uploaded: dict[str, Any],
+        filename: str,
+        media_type: str,
+        caption: str | None,
+    ) -> dict[str, Any]:
         file_obj: dict[str, Any] = {
             "uuid": str(uploaded["uuid"]),
             "size": str(uploaded["size"]),
@@ -287,22 +308,25 @@ class WeMessengerClient:
         ) as client:
             text_chunks = self._split_text(caption or "")
             if media:
-                first_bytes, first_name, first_type = media[0]
-                self.send_media(
-                    client,
-                    content=first_bytes,
-                    filename=first_name,
-                    media_type=first_type,
+                uploads = []
+                for content, filename, media_type in media:
+                    if media_type not in {"image", "video"}:
+                        raise ValueError(f"Unsupported WeMessenger media type: {media_type}")
+                    if not content:
+                        raise ValueError(f"Empty media file: {filename}")
+                    uploads.append(
+                        (self._upload_media(client, content, filename, media_type), filename, media_type)
+                    )
+                first_upload, first_name, first_type = uploads[0]
+                self._send_uploaded_media(
+                    client, uploaded=first_upload, filename=first_name, media_type=first_type,
                     caption=text_chunks[0] if text_chunks else None,
                 )
                 for chunk in text_chunks[1:]:
                     self._send_text_chunk(client, chunk)
-                for content, filename, media_type in media[1:]:
-                    self.send_media(
-                        client,
-                        content=content,
-                        filename=filename,
-                        media_type=media_type,
+                for uploaded, filename, media_type in uploads[1:]:
+                    self._send_uploaded_media(
+                        client, uploaded=uploaded, filename=filename, media_type=media_type,
                         caption=None,
                     )
                 return

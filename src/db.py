@@ -225,6 +225,7 @@ class Database:
         source: str,
         scraped_at: str,
         media: list[dict] | None = None,
+        commit: bool = True,
     ) -> int:
         content_hash = _content_fingerprint(text, media)
         self.conn.execute(
@@ -249,7 +250,8 @@ class Database:
             """,
             (channel_id, message_id),
         ).fetchone()
-        self.conn.commit()
+        if commit:
+            self.conn.commit()
         return int(row["id"])
 
     def has_duplicate_post(self, text: str, media: list[dict] | None = None) -> bool:
@@ -281,6 +283,8 @@ class Database:
         self,
         post_id: int,
         photos: list[dict],
+        *,
+        commit: bool = True,
     ) -> None:
         """photos items: position, url, file_path, image (bytes|None)."""
         self.conn.execute("DELETE FROM photos WHERE post_id = ?", (post_id,))
@@ -301,7 +305,8 @@ class Database:
                 for p in photos
             ],
         )
-        self.conn.commit()
+        if commit:
+            self.conn.commit()
 
     def get_channel_id(self, username: str) -> int | None:
         row = self.conn.execute(
@@ -355,6 +360,7 @@ class Database:
         post_id: int,
         *,
         target: str = "wemessenger",
+        commit: bool = True,
     ) -> None:
         """
         Put post on unpublished queue.
@@ -382,7 +388,8 @@ class Database:
             """,
             (post_id, target, _now()),
         )
-        self.conn.commit()
+        if commit:
+            self.conn.commit()
 
     def enqueue_many(self, post_ids: list[int], *, target: str = "wemessenger") -> int:
         for post_id in post_ids:

@@ -177,6 +177,51 @@ class ScraperGuardTests(unittest.TestCase):
         self.assertEqual(posts[0]["text"], "تیم ⚽ پیروز شد")
         self.assertEqual(posts[0]["media"][0]["type"], "image")
 
+    def test_parser_uses_post_text_instead_of_truncated_reply_preview(self):
+        html = (
+            '<div class="tgme_widget_message" data-post="test/1">'
+            '<a class="tgme_widget_message_reply">'
+            '<div class="tgme_widget_message_text js-message_reply_text">'
+            'متن پیام قبلی…</div></a>'
+            '<div class="tgme_widget_message_text js-message_text">'
+            'متن کامل پاسخ<br>ادامه پاسخ</div></div>'
+        )
+
+        _, posts = _parse_page(html)
+
+        self.assertEqual(posts[0]["text"], "متن کامل پاسخ\nادامه پاسخ")
+
+    def test_parser_uses_media_caption_instead_of_reply_preview(self):
+        html = (
+            '<div class="tgme_widget_message" data-post="test/2">'
+            '<a class="tgme_widget_message_reply">'
+            '<div class="tgme_widget_message_text">متن پیام قبلی…</div></a>'
+            '<a class="tgme_widget_message_photo_wrap" '
+            'style="background-image:url(https://cdn.test/photo.jpg)"></a>'
+            '<div class="tgme_widget_message_caption">کپشن کامل</div></div>'
+        )
+
+        _, posts = _parse_page(html)
+
+        self.assertEqual(posts[0]["text"], "کپشن کامل")
+        self.assertEqual(posts[0]["media"][0]["type"], "image")
+
+    def test_parser_does_not_use_reply_preview_as_missing_caption(self):
+        html = (
+            '<div class="tgme_widget_message" data-post="test/3">'
+            '<a class="tgme_widget_message_reply">'
+            '<div class="tgme_widget_message_text js-message_reply_text">'
+            'متن پیام قبلی…</div></a>'
+            '<a class="tgme_widget_message_photo_wrap" '
+            'style="background-image:url(https://cdn.test/photo.jpg)"></a>'
+            '</div>'
+        )
+
+        _, posts = _parse_page(html)
+
+        self.assertEqual(posts[0]["text"], "")
+        self.assertEqual(posts[0]["media"][0]["type"], "image")
+
     def test_parser_puts_clickable_link_urls_on_separate_lines(self):
         html = (
             '<div class="tgme_widget_message" data-post="test/1">'

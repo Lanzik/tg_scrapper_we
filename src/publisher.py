@@ -7,15 +7,20 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
+import httpx
+
 from config import ROOT_DIR
 from db import Database
+from scraper import _download_bytes, _headers
 from text_clean import clean_post_text, contains_excluded_term
 from wemessenger import WeMessengerClient
 
 logger = logging.getLogger(__name__)
 
 
-def _media_payloads(db: Database, post_id: int) -> list[tuple[bytes, str, str]]:
+def _media_payloads(
+    db: Database, post_id: int, *, telegram_proxy: str | None = None
+) -> list[tuple[bytes, str, str]]:
     media: list[tuple[bytes, str, str]] = []
     for row in db.get_photos(post_id):
         content = row["image"]
@@ -26,8 +31,17 @@ def _media_payloads(db: Database, post_id: int) -> list[tuple[bytes, str, str]]:
             if path.exists():
                 content = path.read_bytes()
         if not content:
-            continue
-        name = Path(row["file_path"] or f"photo_{row['position']}.jpg").name
+            if not row["url"]:
+                raise RuntimeError(f"media #{row['position']} is missing and has no URL")
+            with httpx.Client(
+                headers=_headers(), follow_redirects=True, timeout=30.0, proxy=telegram_proxy
+            ) as client:
+                content, suffix = _download_bytes(
+                    client, row["url"], media_type=str(row["media_type"] or "image")
+                )
+            name = f"media_{row['position']}{suffix}"
+        else:
+            name = Path(row["file_path"] or f"photo_{row['position']}.jpg").name
         media.append((bytes(content), name, str(row["media_type"] or "image")))
     return media
 
@@ -71,6 +85,7 @@ def publish_posts_to_wemessenger(
     remove_trailing_phrases: list[str] | None = None,
     remove_trailing_urls: bool = False,
     exclude_post_terms: list[str] | None = None,
+    telegram_proxy: str | None = None,
 ) -> int:
     """Send posts to WeMessenger. Returns count successfully sent."""
     if not post_ids:
@@ -141,10 +156,10 @@ def publish_posts_to_wemessenger(
                 remove_trailing_phrases=remove_trailing_phrases or [],
                 remove_trailing_urls=remove_trailing_urls,
             )
-            media = _media_payloads(db, post_id)
             now = datetime.now(timezone.utc).isoformat()
 
             try:
+                media = _media_payloads(db, post_id, telegram_proxy=telegram_proxy)
                 client.send_post(text=text, media=media)
             except Exception as exc:
                 db.mark_delivery(
@@ -205,6 +220,7 @@ def publish_pending_to_wemessenger(
     remove_trailing_phrases: list[str] | None = None,
     remove_trailing_urls: bool = False,
     exclude_post_terms: list[str] | None = None,
+    telegram_proxy: str | None = None,
 ) -> tuple[int, int]:
     """Drain unpublished queue. Returns (sent, pending_before)."""
     with Database(database) as db:
@@ -237,5 +253,6 @@ def publish_pending_to_wemessenger(
         remove_trailing_phrases=remove_trailing_phrases,
         remove_trailing_urls=remove_trailing_urls,
         exclude_post_terms=exclude_post_terms,
+        telegram_proxy=telegram_proxy,
     )
     return sent, len(pending)
