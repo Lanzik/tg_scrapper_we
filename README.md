@@ -31,7 +31,7 @@ channels:
 
 In this example, `@source_one` publishes to its own WeMessenger channel, while `@source_two` and `@source_three` both publish to another one. Sources sharing a destination are published sequentially.
 
-Use either `telegram` or `eitaa` for each entry, and set its destination node to the desired WeMessenger channel. Eitaa page and media requests always connect directly, independently of Telegram's proxy settings. Telegram and Eitaa channels with the same username are stored separately.
+Use either `telegram` or `eitaa` for each entry, and set its destination node to the desired WeMessenger channel. Eitaa and Telegram use the same `telegram_proxy` when `scraper_use_proxy` is enabled, including for media retries. Telegram and Eitaa channels with the same username are stored separately.
 
 Eitaa's public web view does not expose download URLs for some large videos or unsupported attachments. Such posts remain failed in the queue, with an error, and are not published as caption-only messages. Uploading unsupported attachment types is not supported. This bridge does not log in to Eitaa.
 

@@ -47,7 +47,7 @@ log_backup_count: 5
 scraper_use_proxy: true
 publish_use_proxy: false
 
-# Proxy URL used by either scraper or publish when its respective flag is enabled
+# Proxy URL used by Telegram and Eitaa scraping, or publishing, when enabled
 telegram_proxy: "socks5://127.0.0.1:10808"
 
 wemessenger:

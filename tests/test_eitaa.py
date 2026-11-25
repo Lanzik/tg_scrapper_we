@@ -12,7 +12,7 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from config import load_settings
 from db import Database
-from main import _scrape_route
+from main import _publish_route, _scrape_route
 from publisher import publish_posts_to_wemessenger
 from scraper import _collect_posts, _download_bytes, _parse_page, normalize_eitaa_username, scrape_channel
 
@@ -111,7 +111,7 @@ class EitaaTests(unittest.TestCase):
             with Database(path) as db:
                 self.assertEqual(db.count_queue("node")["failed"], 1)
 
-    def test_scrape_and_publish_eitaa_media_without_proxy(self):
+    def test_scrape_and_publish_eitaa_media_with_proxy(self):
         post = {"id": 1, "date": None, "text": "caption", "views": None,
                 "media": [{"type": "video", "url": "https://eitaa.com/download_video"}]}
         http = MagicMock()
@@ -122,9 +122,9 @@ class EitaaTests(unittest.TestCase):
             with patch("scraper.DATA_DIR", root), patch("scraper._collect_posts", return_value=("Test", [post])), \
                  patch("scraper.httpx.Client", return_value=http) as factory:
                 ids = scrape_channel("https://eitaa.com/test", database=path, platform="eitaa",
-                                     download_photos=False, target="node")
+                                     download_photos=False, target="node", proxy="socks5://127.0.0.1:1080")
                 self.assertFalse(factory.call_args.kwargs["trust_env"])
-                self.assertNotIn("proxy", factory.call_args.kwargs)
+                self.assertEqual(factory.call_args.kwargs["proxy"], "socks5://127.0.0.1:1080")
             with Database(path) as db:
                 self.assertEqual(db.get_max_message_id("eitaa:test"), 1)
                 self.assertEqual(db.get_post(ids[0])["source"], "https://eitaa.com/test/1")
@@ -134,19 +134,58 @@ class EitaaTests(unittest.TestCase):
                 self.assertEqual(publish_posts_to_wemessenger(
                     path, ids, sender, target="node", telegram_proxy="socks5://127.0.0.1:1080"
                 ), 1)
-                self.assertIsNone(factory.call_args.kwargs["proxy"])
-                self.assertFalse(factory.call_args.kwargs["trust_env"])
+                self.assertEqual(factory.call_args.kwargs["proxy"], "socks5://127.0.0.1:1080")
             sender.send_post.assert_called_once_with(text="caption", media=[(b"video", "media_1.mp4", "video")])
 
-    def test_eitaa_route_does_not_use_telegram_proxy(self):
+    def test_eitaa_media_retry_without_proxy_stays_direct(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "posts.db"
+            with Database(path) as db:
+                channel = db.upsert_channel("eitaa:test", None, "https://eitaa.com/test", "2020")
+                post = db.upsert_post(channel, message_id=1, date=None, text="caption", views=None,
+                                      source="https://eitaa.com/test/1", scraped_at="2020")
+                db.replace_photos(post, [{"position": 1, "media_type": "image",
+                                          "url": "https://eitaa.com/image"}])
+                db.enqueue_for_publish(post, target="node")
+            http = MagicMock()
+            http.__enter__.return_value = http
+            with patch("publisher.httpx.Client", return_value=http) as factory, \
+                 patch("publisher._download_bytes", return_value=(b"image", ".jpg")):
+                self.assertEqual(publish_posts_to_wemessenger(path, [post], MagicMock(), target="node"), 1)
+            self.assertIsNone(factory.call_args.kwargs["proxy"])
+            self.assertFalse(factory.call_args.kwargs["trust_env"])
+
+    def test_eitaa_route_obeys_scraper_proxy_setting(self):
         settings = {"telegram_proxy": "socks5://proxy:1080", "scraper_use_proxy": True,
                     "limit": 1, "download_media": True, "database": Path("test.db"),
                     "max_media_per_post": 1, "deduplicate_posts": True}
         route = {"telegram": "https://eitaa.com/test", "platform": "eitaa", "exclude_post_terms": []}
-        with patch("main.scrape_channel", return_value=[]) as scrape:
-            _scrape_route(settings, route, initial=True, target="node")
-        self.assertIsNone(scrape.call_args.kwargs["proxy"])
-        self.assertEqual(scrape.call_args.kwargs["platform"], "eitaa")
+        for enabled in (True, False):
+            with self.subTest(enabled=enabled), patch("main.scrape_channel", return_value=[]) as scrape:
+                settings["scraper_use_proxy"] = enabled
+                _scrape_route(settings, route, initial=True, target="node")
+                self.assertEqual(scrape.call_args.kwargs["proxy"], "socks5://proxy:1080" if enabled else None)
+                self.assertEqual(scrape.call_args.kwargs["platform"], "eitaa")
+
+    def test_eitaa_publish_route_uses_scraper_proxy_independently_of_we_proxy(self):
+        settings = {
+            "telegram_proxy": "socks5://proxy:1080", "scraper_use_proxy": True,
+            "publish_use_proxy": False, "wemessenger": {"api_base": "https://we.test"},
+            "database": Path("test.db"), "delete_media_after_publish": True,
+        }
+        route = {
+            "telegram": "https://eitaa.com/test", "username": "eitaa:test", "platform": "eitaa",
+            "send_delay_seconds": 0, "footer_tag": "", "remove_trailing_phrases": [],
+            "remove_trailing_urls": False, "exclude_post_terms": [],
+        }
+        with patch("main.wemessenger_reachable", return_value=True) as reachable, \
+             patch("main.publish_pending_to_wemessenger", return_value=(0, 0)) as publish:
+            _publish_route(settings, route, "node", MagicMock())
+            self.assertIsNone(reachable.call_args.kwargs["proxy"])
+            self.assertEqual(publish.call_args.kwargs["telegram_proxy"], "socks5://proxy:1080")
+            settings["scraper_use_proxy"] = False
+            _publish_route(settings, route, "node", MagicMock())
+            self.assertIsNone(publish.call_args.kwargs["telegram_proxy"])
 
 
 if __name__ == "__main__":

@@ -162,9 +162,9 @@ def publish_posts_to_wemessenger(
             now = datetime.now(timezone.utc).isoformat()
 
             try:
-                direct = (post["source"] or "").startswith("https://eitaa.com/")
+                direct = (post["source"] or "").startswith("https://eitaa.com/") and not telegram_proxy
                 media = _media_payloads(
-                    db, post_id, telegram_proxy=None if direct else telegram_proxy, direct=direct
+                    db, post_id, telegram_proxy=telegram_proxy, direct=direct
                 )
                 client.send_post(text=text, media=media)
             except Exception as exc:

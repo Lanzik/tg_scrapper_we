@@ -450,12 +450,10 @@ def scrape_channel(
 
     Returns list of SQLite post row ids saved in this run.
     If only_new=True, skips posts already stored (by message_id).
-    `proxy` applies only to Telegram HTTP fetches (e.g. socks5://127.0.0.1:10808).
+    `proxy` applies to source HTTP fetches (e.g. socks5://127.0.0.1:10808).
     """
     if platform not in {"telegram", "eitaa"}:
         raise ValueError(f"Unsupported source platform: {platform}")
-    if platform == "eitaa" and proxy:
-        raise ValueError("Eitaa sources do not use a proxy")
     username = normalize_eitaa_username(channel) if platform == "eitaa" else normalize_username(channel)
     storage_username = f"eitaa:{username.lower()}" if platform == "eitaa" else username
     db_path = database or (DATA_DIR / "telegram.db")
@@ -477,7 +475,7 @@ def scrape_channel(
             client_kwargs["trust_env"] = False
         if proxy:
             client_kwargs["proxy"] = proxy
-            print(f"Telegram proxy: {proxy}")
+            print(f"Source proxy: {proxy}")
 
         with httpx.Client(**client_kwargs) as client:
             title, ordered = _collect_posts(
