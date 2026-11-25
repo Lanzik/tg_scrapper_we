@@ -1,6 +1,6 @@
-# Telegram to WeMessenger bridge
+# Telegram and Eitaa to WeMessenger bridge
 
-Scrape public Telegram channels, route each source to its configured WeMessenger channel, publish queued posts, and expire old database records in one process.
+Scrape public Telegram and Eitaa channels, route each source to its configured WeMessenger channel, publish queued posts, and expire old database records in one process.
 
 ## Configure
 
@@ -11,7 +11,7 @@ pip install -r requirements.txt
 cp settings.yaml.example settings.yaml
 ```
 
-Edit `settings.yaml`. Each `channels` entry maps one Telegram source to one WeMessenger node and can set its own schedule and retention period. Entries can use different destinations, or share a destination when several Telegram sources should publish to the same WeMessenger channel:
+Edit `settings.yaml`. Each `channels` entry maps one Telegram or Eitaa source to one WeMessenger node and can set its own schedule and retention period. Entries can use different destinations, or share a destination:
 
 ```yaml
 channels:
@@ -25,11 +25,17 @@ channels:
     wemessenger_node: "ANOTHER_WE_CHANNEL_NODE_UUID"
   - telegram: "@source_three"
     wemessenger_node: "ANOTHER_WE_CHANNEL_NODE_UUID"
+  - eitaa: "https://eitaa.com/andishetubaee"
+    wemessenger_node: "WE_CHANNEL_NODE_UUID"
 ```
 
 In this example, `@source_one` publishes to its own WeMessenger channel, while `@source_two` and `@source_three` both publish to another one. Sources sharing a destination are published sequentially.
 
-`poll_interval_seconds` is the pause between Telegram checks. `publish_interval_seconds` is the pause between attempts to drain that source's queue. `send_delay_seconds` is the pause between messages in a publishing batch. `retention_days` deletes posts older than that many days, measured from when they were scraped; set it to `0` to keep data indefinitely. Deleting a post also deletes its photos and queue rows.
+Use either `telegram` or `eitaa` for each entry, and set its destination node to the desired WeMessenger channel. Eitaa page and media requests always connect directly, independently of Telegram's proxy settings. Telegram and Eitaa channels with the same username are stored separately.
+
+Eitaa's public web view does not expose download URLs for some large videos or unsupported attachments. Such posts remain failed in the queue, with an error, and are not published as caption-only messages. Uploading unsupported attachment types is not supported. This bridge does not log in to Eitaa.
+
+`poll_interval_seconds` is the pause between source checks. `publish_interval_seconds` is the pause between attempts to drain that source's queue. `send_delay_seconds` is the pause between messages in a publishing batch. `retention_days` deletes posts older than that many days, measured from when they were scraped; set it to `0` to keep data indefinitely. Deleting a post also deletes its photos and queue rows.
 
 Each channel can set `footer_tag` to ensure its tag appears once on a separate final line. Set `remove_trailing_phrases` at the top level to apply the same list to every channel, without repeating it on each entry:
 

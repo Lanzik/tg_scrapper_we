@@ -6,12 +6,12 @@ import logging
 import re
 from datetime import datetime, timezone
 from pathlib import Path
-from urllib.parse import parse_qs, urlparse
+from urllib.parse import parse_qs, urljoin, urlparse
 
 import httpx
 from bs4 import BeautifulSoup
 
-from config import DATA_DIR, USER_AGENT
+from config import DATA_DIR, USER_AGENT, normalize_eitaa_username
 from db import Database
 from text_clean import contains_excluded_term
 
@@ -47,11 +47,13 @@ def _extract_media(message_el, limit: int) -> list[dict[str, str]]:
     seen: set[str] = set()
 
     for element in message_el.select(
-        "a.tgme_widget_message_photo_wrap, .tgme_widget_message_video_player, video"
+        "a.tgme_widget_message_photo_wrap, .tgme_widget_message_video_player, video, .unavailable_source_media"
     ):
         media_type = "image"
         url = None
-        if element.name == "a":
+        if "unavailable_source_media" in element.get("class", []):
+            media_type = "unsupported"
+        elif element.name == "a" and "tgme_widget_message_photo_wrap" in element.get("class", []):
             match = PHOTO_URL_RE.search(element.get("style") or "")
             url = match.group(1) if match else None
         elif element.name == "video":
@@ -177,8 +179,29 @@ def _parse_page(
     html: str,
     *,
     max_media_per_post: int = 1,
+    platform: str = "telegram",
 ) -> tuple[str | None, list[dict]]:
     soup = BeautifulSoup(html, "lxml")
+    if platform == "eitaa":
+        for element in soup.select("[class]"):
+            element["class"] = [
+                cls.replace("etme_", "tgme_", 1) if cls.startswith("etme_") else cls
+                for cls in element.get("class", [])
+            ]
+        for element in soup.select(".tgme_widget_message_photo_wrap"):
+            style = element.get("style") or ""
+            element["style"] = re.sub(
+                r"""url\((['"]?)(/[^'")]+)\1\)""",
+                lambda match: f"url('{urljoin('https://eitaa.com', match.group(2))}')",
+                style,
+            )
+        for element in soup.select(".tgme_widget_message_video_player video[src], .tgme_widget_message_video_player source[src]"):
+            element["src"] = urljoin("https://eitaa.com", element["src"])
+        for element in soup.select(".message_media_view_in_eitaa, .tgme_widget_message_document_wrap"):
+            if not element.find_parent(class_="tgme_widget_message_video_player"):
+                marker = soup.new_tag("div")
+                marker["class"] = ["unavailable_source_media"]
+                element.insert_before(marker)
     title_el = soup.select_one(".tgme_channel_info_header_title")
     title = title_el.get_text(strip=True) if title_el else None
 
@@ -232,6 +255,10 @@ def _download_bytes(
             response.raise_for_status()
             if not response.content:
                 raise ValueError("media download returned empty content")
+            if response.status_code == 206:
+                match = re.fullmatch(r"bytes 0-(\d+)/(\d+)", response.headers.get("content-range", ""))
+                if not match or int(match.group(1)) + 1 != int(match.group(2)) or len(response.content) != int(match.group(2)):
+                    raise ValueError("media download returned incomplete content")
             suffix = Path(urlparse(url).path).suffix.lower()
             allowed = {".mp4", ".m4v", ".mov", ".webm", ".mkv"} if media_type == "video" else {".jpg", ".jpeg", ".png", ".webp", ".gif"}
             if suffix not in allowed:
@@ -251,6 +278,7 @@ def _collect_posts(
     limit: int | None,
     after_id: int | None = None,
     max_media_per_post: int = 1,
+    platform: str = "telegram",
 ) -> tuple[str | None, list[dict]]:
     """
     Fetch posts from the web preview.
@@ -262,7 +290,10 @@ def _collect_posts(
     before: int | None = None
 
     while True:
-        url = f"https://t.me/s/{username}"
+        url = (
+            f"https://eitaa.com/{username}"
+            if platform == "eitaa" else f"https://t.me/s/{username}"
+        )
         if before is not None:
             url = f"{url}?before={before}"
 
@@ -274,7 +305,11 @@ def _collect_posts(
             )
         response.raise_for_status()
 
-        if not _looks_like_telegram_channel_html(response.text):
+        if platform == "eitaa":
+            valid_html = "etme_widget_message" in response.text or "etme_channel_info_header_title" in response.text
+        else:
+            valid_html = _looks_like_telegram_channel_html(response.text)
+        if not valid_html:
             snippet = re.sub(r"\s+", " ", response.text[:500]).strip()
             raise RuntimeError(
                 f"Telegram returned HTTP {response.status_code} but no channel content for @{username}. "
@@ -285,6 +320,7 @@ def _collect_posts(
         page_title, posts = _parse_page(
             response.text,
             max_media_per_post=max_media_per_post,
+            **({"platform": "eitaa"} if platform == "eitaa" else {}),
         )
         if page_title:
             title = page_title
@@ -340,6 +376,7 @@ def _save_post(
     max_media_per_post: int,
     scraped_at: str,
     target: str,
+    platform: str = "telegram",
 ) -> int:
     media_rows: list[dict] = []
     media_items = post.get("media", [])[:max_media_per_post]
@@ -376,7 +413,10 @@ def _save_post(
             date=post["date"],
             text=post["text"] or "",
             views=post["views"],
-            source=f"https://t.me/{username}/{post['id']}",
+            source=(
+                f"https://eitaa.com/{username}/{post['id']}"
+                if platform == "eitaa" else f"https://t.me/{username}/{post['id']}"
+            ),
             scraped_at=scraped_at,
             media=post.get("media", []),
             commit=False,
@@ -402,6 +442,7 @@ def scrape_channel(
     max_media_per_post: int = 1,
     deduplicate_posts: bool = True,
     exclude_post_terms: list[str] | None = None,
+    platform: str = "telegram",
 ) -> list[int]:
     """
     Scrape a *public* Telegram channel via https://t.me/s/<username>
@@ -411,20 +452,29 @@ def scrape_channel(
     If only_new=True, skips posts already stored (by message_id).
     `proxy` applies only to Telegram HTTP fetches (e.g. socks5://127.0.0.1:10808).
     """
-    username = normalize_username(channel)
+    if platform not in {"telegram", "eitaa"}:
+        raise ValueError(f"Unsupported source platform: {platform}")
+    if platform == "eitaa" and proxy:
+        raise ValueError("Eitaa sources do not use a proxy")
+    username = normalize_eitaa_username(channel) if platform == "eitaa" else normalize_username(channel)
+    storage_username = f"eitaa:{username.lower()}" if platform == "eitaa" else username
     db_path = database or (DATA_DIR / "telegram.db")
     media_dir = DATA_DIR / "media" / username
+    if platform == "eitaa":
+        media_dir = DATA_DIR / "media" / "eitaa" / username
     media_dir.mkdir(parents=True, exist_ok=True)
     saved_ids: list[int] = []
 
     with Database(db_path) as db:
-        after_id = db.get_max_message_id(username) if only_new else None
+        after_id = db.get_max_message_id(storage_username) if only_new else None
 
         client_kwargs: dict = {
             "headers": _headers(),
             "follow_redirects": True,
             "timeout": 30.0,
         }
+        if platform == "eitaa":
+            client_kwargs["trust_env"] = False
         if proxy:
             client_kwargs["proxy"] = proxy
             print(f"Telegram proxy: {proxy}")
@@ -436,6 +486,7 @@ def scrape_channel(
                 limit=limit,
                 after_id=after_id,
                 max_media_per_post=max_media_per_post,
+                **({"platform": "eitaa"} if platform == "eitaa" else {}),
             )
 
             mode = "new posts only" if only_new else "posts"
@@ -449,9 +500,9 @@ def scrape_channel(
 
             scraped_at = datetime.now(timezone.utc).isoformat()
             channel_id = db.upsert_channel(
-                username,
+                storage_username,
                 title,
-                f"https://t.me/s/{username}",
+                f"https://eitaa.com/{username}" if platform == "eitaa" else f"https://t.me/s/{username}",
                 scraped_at,
             )
 
@@ -485,10 +536,11 @@ def scrape_channel(
                     max_media_per_post=max_media_per_post,
                     scraped_at=scraped_at,
                     target=target,
+                    platform=platform,
                 )
                 saved_ids.append(post_row_id)
 
-            queue = db.count_channel_queue(target, username)
+            queue = db.count_channel_queue(target, storage_username)
             print(
                 f"Saved {len(saved_ids)} post(s); "
                 f"unpublished queue={queue['unpublished']} "

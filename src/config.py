@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from pathlib import Path
 from urllib.parse import urlparse
 
@@ -14,6 +15,20 @@ USER_AGENT = (
     "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
     "(KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
 )
+
+
+def normalize_eitaa_username(channel: str) -> str:
+    value = channel.strip()
+    if "://" in value or value.lower().startswith(("eitaa.com/", "www.eitaa.com/")):
+        parsed = urlparse(value if "://" in value else f"https://{value}")
+        if parsed.scheme not in {"http", "https"} or parsed.netloc.lower() not in {"eitaa.com", "www.eitaa.com"}:
+            raise ValueError(f"Invalid Eitaa channel URL: {channel}")
+        value = parsed.path.strip("/")
+    value = value.lstrip("@")
+    if not re.fullmatch(r"[A-Za-z0-9_]+", value):
+        raise ValueError(f"Invalid Eitaa channel username: {channel}")
+    return value
+
 
 def _channel_username(channel: str) -> str:
     value = channel.strip()
@@ -47,22 +62,39 @@ def _parse_channel_routes(data: dict) -> list[dict]:
     seen: set[str] = set()
     for entry in entries:
         if isinstance(entry, dict):
-            channel = str(entry.get("telegram") or "").strip()
+            telegram = str(entry.get("telegram") or "").strip()
+            eitaa = str(entry.get("eitaa") or "").strip()
+            if telegram and eitaa:
+                raise SystemExit("Each channel entry must specify either telegram or eitaa, not both.")
+            platform = "eitaa" if eitaa else "telegram"
+            channel = eitaa or telegram
             node = str(entry.get("wemessenger_node") or entry.get("channel_node") or default_node).strip()
         else:
             channel = str(entry or "").strip()
+            platform = "telegram"
             node = default_node
         if not channel:
             continue
 
-        username = _channel_username(channel)
+        if platform == "eitaa":
+            try:
+                source_username = normalize_eitaa_username(channel)
+            except ValueError as exc:
+                raise SystemExit(str(exc)) from exc
+            username = f"eitaa:{source_username.lower()}"
+        else:
+            source_username = _channel_username(channel)
+            username = source_username
         if not username:
             raise SystemExit(f"Invalid Telegram channel in settings.yaml: {channel!r}")
         if username.lower() in seen:
             raise SystemExit(f"Duplicate Telegram channel in settings.yaml: {channel}")
         seen.add(username.lower())
 
-        route = {"telegram": channel, "username": username, "wemessenger_node": node}
+        route = {
+            "telegram": channel, "platform": platform, "source_username": source_username,
+            "username": username, "wemessenger_node": node,
+        }
         raw_footer_tag = (
             entry.get("footer_tag", data.get("footer_tag", "")) if isinstance(entry, dict)
             else data.get("footer_tag", "")

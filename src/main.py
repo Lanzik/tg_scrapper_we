@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 
 def _scrape_route(settings: dict, route: dict, *, initial: bool, target: str) -> None:
-    proxy = settings["telegram_proxy"] if settings["scraper_use_proxy"] else None
+    proxy = settings["telegram_proxy"] if settings["scraper_use_proxy"] and route.get("platform") != "eitaa" else None
     saved = scrape_channel(
         route["telegram"],
         limit=settings["limit"] if initial else None,
@@ -31,6 +31,7 @@ def _scrape_route(settings: dict, route: dict, *, initial: bool, target: str) ->
         max_media_per_post=settings["max_media_per_post"],
         deduplicate_posts=settings["deduplicate_posts"],
         exclude_post_terms=route["exclude_post_terms"],
+        **({"platform": "eitaa"} if route.get("platform") == "eitaa" else {}),
     )
     if saved:
         logger.info("queued %s new post(s) from %s", len(saved), route["telegram"])
@@ -104,7 +105,7 @@ def _publish_route(settings: dict, route: dict, target: str, client) -> None:
         remove_trailing_phrases=route["remove_trailing_phrases"],
         remove_trailing_urls=route["remove_trailing_urls"],
         exclude_post_terms=route["exclude_post_terms"],
-        telegram_proxy=settings["telegram_proxy"] if settings["scraper_use_proxy"] else None,
+        telegram_proxy=settings["telegram_proxy"] if settings["scraper_use_proxy"] and route.get("platform") != "eitaa" else None,
     )
     if pending:
         logger.info("published %s/%s post(s) from %s", sent, pending, route["telegram"])

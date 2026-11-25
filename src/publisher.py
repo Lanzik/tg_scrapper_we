@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 
 def _media_payloads(
-    db: Database, post_id: int, *, telegram_proxy: str | None = None
+    db: Database, post_id: int, *, telegram_proxy: str | None = None, direct: bool = False
 ) -> list[tuple[bytes, str, str]]:
     media: list[tuple[bytes, str, str]] = []
     for row in db.get_photos(post_id):
@@ -32,9 +32,12 @@ def _media_payloads(
                 content = path.read_bytes()
         if not content:
             if not row["url"]:
-                raise RuntimeError(f"media #{row['position']} is missing and has no URL")
+                raise RuntimeError(
+                    f"{row['media_type']} media #{row['position']} is unavailable or has no download URL"
+                )
             with httpx.Client(
-                headers=_headers(), follow_redirects=True, timeout=30.0, proxy=telegram_proxy
+                headers=_headers(), follow_redirects=True, timeout=30.0, proxy=telegram_proxy,
+                trust_env=not direct,
             ) as client:
                 content, suffix = _download_bytes(
                     client, row["url"], media_type=str(row["media_type"] or "image")
@@ -159,7 +162,10 @@ def publish_posts_to_wemessenger(
             now = datetime.now(timezone.utc).isoformat()
 
             try:
-                media = _media_payloads(db, post_id, telegram_proxy=telegram_proxy)
+                direct = (post["source"] or "").startswith("https://eitaa.com/")
+                media = _media_payloads(
+                    db, post_id, telegram_proxy=None if direct else telegram_proxy, direct=direct
+                )
                 client.send_post(text=text, media=media)
             except Exception as exc:
                 db.mark_delivery(

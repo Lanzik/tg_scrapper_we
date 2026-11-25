@@ -16,6 +16,13 @@ channels:
     send_delay_seconds: 30
     retention_days: 90
 
+  - eitaa: "https://eitaa.com/andishetubaee"
+    wemessenger_node: "PASTE_EITAA_DESTINATION_CHANNEL_UUID"
+    poll_interval_seconds: 60
+    publish_interval_seconds: 30
+    send_delay_seconds: 30
+    retention_days: 90
+
 limit: 50
 download_media: true
 max_media_per_post: 1
