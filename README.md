@@ -33,7 +33,7 @@ In this example, `@source_one` publishes to its own WeMessenger channel, while `
 
 Use either `telegram` or `eitaa` for each entry, and set its destination node to the desired WeMessenger channel. Eitaa and Telegram use the same `telegram_proxy` when `scraper_use_proxy` is enabled, including for media retries. Telegram and Eitaa channels with the same username are stored separately.
 
-Eitaa's public web view does not expose download URLs for some large videos or unsupported attachments. Such posts remain failed in the queue, with an error, and are not published as caption-only messages. Uploading unsupported attachment types is not supported. This bridge does not log in to Eitaa.
+The public views of Telegram and Eitaa do not expose download URLs for every attachment. In particular, some large Eitaa videos and files link only to the post, not the file. Such posts remain failed in the queue, with an error, and are not published as caption-only messages. This bridge does not log in to either service.
 
 `poll_interval_seconds` is the pause between source checks. `publish_interval_seconds` is the pause between attempts to drain that source's queue. `send_delay_seconds` is the pause between messages in a publishing batch. `retention_days` deletes posts older than that many days, measured from when they were scraped; set it to `0` to keep data indefinitely. Deleting a post also deletes its photos and queue rows.
 
@@ -47,7 +47,7 @@ It removes the entire trailing line when it contains one of the configured phras
 
 Set top-level `exclude_post_terms` to filter words across all channels, for example `exclude_post_terms: ["تبلیغ", ""]`. A channel-level `exclude_post_terms` adds terms to the global list for that channel. Matching is case-insensitive substring matching and ignores Persian/Arabic Kaf and Yeh variants, diacritics, and invisible joiner characters. New matches are skipped before saving; existing queued matches are marked `filtered` and never sent. Filtered posts remain in the database for audit and can be removed later by normal retention.
 
-`download_media` enables media downloads, and `max_media_per_post` limits how many images or videos are downloaded and published from each Telegram post. The limit defaults to `1`; selection follows the media order in the Telegram post. Set a higher value to keep and publish more items. The old `download_photos` key is still accepted. Videos are stored as files and uploaded using WeMessenger's video media type.
+`download_media` enables media downloads, and `max_media_per_post` limits how many images, videos, audio files or other files are downloaded and published from each post. The limit defaults to `1`; selection follows media order. Set a higher value to keep and publish more items. The old `download_photos` key is still accepted. Files are stored on disk, preserving their displayed filename where available; audio and other files are sent via the WeMessenger upload API as `audio` and `file`, respectively.
 
 Selected media is required for publication: failed or missing downloads are retried when publishing, using the scraper's Telegram proxy settings, and uploads are attempted up to three times. If media is still unavailable, the post remains failed in the queue rather than publishing its caption alone; later queue runs retry it. With `download_media: false`, media is downloaded on demand during publication instead of during scraping. Only media selected by `max_media_per_post` is sent.
 

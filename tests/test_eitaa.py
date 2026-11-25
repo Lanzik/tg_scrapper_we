@@ -68,7 +68,7 @@ class EitaaTests(unittest.TestCase):
         self.assertEqual(posts[0]["media"], [{"type": "image", "url": "https://eitaa.com/download_photo?token=x"}])
         self.assertEqual(posts[1]["media"], [{"type": "video", "url": "https://eitaa.com/download_video?token=x"}])
         self.assertEqual(posts[2]["media"], [{"type": "video", "url": ""}])
-        self.assertEqual(posts[3]["media"], [{"type": "unsupported", "url": ""}])
+        self.assertEqual(posts[3]["media"], [{"type": "file", "url": ""}])
 
     def test_pagination_fetches_before_and_stops_at_known_post(self):
         def page(ids):

@@ -42,6 +42,7 @@ CREATE TABLE IF NOT EXISTS photos (
     url         TEXT,
     file_path   TEXT,
     media_type  TEXT    NOT NULL DEFAULT 'image',
+    filename    TEXT,
     image       BLOB,
     UNIQUE (post_id, position)
 );
@@ -119,6 +120,8 @@ class Database:
             self.conn.execute(
                 "ALTER TABLE photos ADD COLUMN media_type TEXT NOT NULL DEFAULT 'image'"
             )
+        if "filename" not in columns:
+            self.conn.execute("ALTER TABLE photos ADD COLUMN filename TEXT")
 
     def _migrate_content_hashes(self) -> None:
         columns = {
@@ -290,8 +293,8 @@ class Database:
         self.conn.execute("DELETE FROM photos WHERE post_id = ?", (post_id,))
         self.conn.executemany(
             """
-                INSERT INTO photos (post_id, position, url, file_path, media_type, image)
-                VALUES (?, ?, ?, ?, ?, ?)
+                INSERT INTO photos (post_id, position, url, file_path, media_type, filename, image)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
             """,
             [
                 (
@@ -300,6 +303,7 @@ class Database:
                     p.get("url"),
                     p.get("file_path"),
                     p.get("media_type", "image"),
+                    p.get("filename"),
                     p.get("image"),
                 )
                 for p in photos

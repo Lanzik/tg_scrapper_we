@@ -13,6 +13,7 @@ DEFAULT_API_BASE = "https://api.wemessenger.ir"
 DEFAULT_FILE_UPLOAD_URL = "https://ms-file.wemessenger.ir/upload"
 TEXT_LIMIT = 4096
 logger = logging.getLogger(__name__)
+SUPPORTED_MEDIA_TYPES = {"image", "video", "audio", "file"}
 
 # Metadata returned by file server that clients need to open the file
 _UPLOAD_META_KEYS = (
@@ -217,7 +218,7 @@ class WeMessengerClient:
         media_type: str,
         caption: str | None = None,
     ) -> dict[str, Any]:
-        if media_type not in {"image", "video"}:
+        if media_type not in SUPPORTED_MEDIA_TYPES:
             raise ValueError(f"Unsupported WeMessenger media type: {media_type}")
         uploaded = self._upload_media(client, content, filename, media_type)
         return self._send_uploaded_media(
@@ -310,7 +311,7 @@ class WeMessengerClient:
             if media:
                 uploads = []
                 for content, filename, media_type in media:
-                    if media_type not in {"image", "video"}:
+                    if media_type not in SUPPORTED_MEDIA_TYPES:
                         raise ValueError(f"Unsupported WeMessenger media type: {media_type}")
                     if not content:
                         raise ValueError(f"Empty media file: {filename}")

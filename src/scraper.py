@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 import logging
+import mimetypes
 import re
 from datetime import datetime, timezone
 from pathlib import Path
-from urllib.parse import parse_qs, urljoin, urlparse
+from urllib.parse import parse_qs, unquote, urljoin, urlparse
 
 import httpx
 from bs4 import BeautifulSoup
@@ -42,17 +43,48 @@ def _headers() -> dict[str, str]:
     return {"User-Agent": USER_AGENT, "Accept-Language": "en-US,en;q=0.9"}
 
 
-def _extract_media(message_el, limit: int) -> list[dict[str, str]]:
+def _extract_media(message_el, limit: int, *, base_url: str = "https://t.me") -> list[dict[str, str]]:
     media: list[dict[str, str]] = []
     seen: set[str] = set()
 
     for element in message_el.select(
-        "a.tgme_widget_message_photo_wrap, .tgme_widget_message_video_player, video, .unavailable_source_media"
+        "a.tgme_widget_message_photo_wrap, .tgme_widget_message_video_player, video, "
+        ".tgme_widget_message_document_wrap, .tgme_widget_message_audio_player, "
+        ".tgme_widget_message_voice_player, audio, .unavailable_source_media"
     ):
         media_type = "image"
         url = None
-        if "unavailable_source_media" in element.get("class", []):
+        classes = element.get("class", [])
+        filename = None
+        if element.name == "audio" and element.find_parent(
+            class_=["tgme_widget_message_document_wrap", "tgme_widget_message_audio_player", "tgme_widget_message_voice_player"]
+        ):
+            continue
+        if "unavailable_source_media" in classes:
             media_type = "unsupported"
+        elif element.name == "audio":
+            media_type = "audio"
+            source = element.select_one("source[src]")
+            url = element.get("src") or (source.get("src") if source else None)
+            if url:
+                url = urljoin(base_url, url)
+        elif any(cls in classes for cls in (
+            "tgme_widget_message_document_wrap", "tgme_widget_message_audio_player",
+            "tgme_widget_message_voice_player",
+        )):
+            title = element.select_one(".tgme_widget_message_document_title, .tgme_widget_message_audio_title")
+            filename = title.get_text(" ", strip=True) if title else None
+            is_audio = bool(element.select_one(".audio, audio")) or any("audio" in cls or "voice" in cls for cls in classes)
+            media_type = "audio" if is_audio else "file"
+            source = element.select_one("audio[src], audio source[src], a[download][href]")
+            url = element.get("data-src") or element.get("data-url")
+            if source:
+                url = source.get("src") or source.get("href") or url
+            href = element.get("href") or ""
+            if not url and (element.has_attr("download") or urlparse(href).path.startswith("/download_")):
+                url = href
+            if url:
+                url = urljoin(base_url, url)
         elif element.name == "a" and "tgme_widget_message_photo_wrap" in element.get("class", []):
             match = PHOTO_URL_RE.search(element.get("style") or "")
             url = match.group(1) if match else None
@@ -75,19 +107,25 @@ def _extract_media(message_el, limit: int) -> list[dict[str, str]]:
                 if video:
                     url = video.get("src") or video.get("data-src")
 
+        item = {"type": media_type, "url": ""}
+        if filename and media_type in {"file", "audio"}:
+            item["filename"] = filename
         if not url or not url.startswith(("http://", "https://")):
-            media.append({"type": media_type, "url": ""})
+            media.append(item)
         elif url in seen:
             continue
         else:
-            media.append({"type": media_type, "url": url})
+            item["url"] = url
+            media.append(item)
             seen.add(url)
         if len(media) >= limit:
             break
     return media
 
 
-def _parse_message(message_el, *, max_media_per_post: int = 1) -> dict | None:
+def _parse_message(
+    message_el, *, max_media_per_post: int = 1, base_url: str = "https://t.me"
+) -> dict | None:
     data_post = message_el.get("data-post")  # e.g. channel/123
     if not data_post or "/" not in data_post:
         return None
@@ -155,7 +193,7 @@ def _parse_message(message_el, *, max_media_per_post: int = 1) -> dict | None:
         ).strip()
     else:
         text = ""
-    media = _extract_media(message_el, max_media_per_post)
+    media = _extract_media(message_el, max_media_per_post, base_url=base_url)
     if not text and not media:
         return None
 
@@ -197,7 +235,7 @@ def _parse_page(
             )
         for element in soup.select(".tgme_widget_message_video_player video[src], .tgme_widget_message_video_player source[src]"):
             element["src"] = urljoin("https://eitaa.com", element["src"])
-        for element in soup.select(".message_media_view_in_eitaa, .tgme_widget_message_document_wrap"):
+        for element in soup.select(".message_media_view_in_eitaa"):
             if not element.find_parent(class_="tgme_widget_message_video_player"):
                 marker = soup.new_tag("div")
                 marker["class"] = ["unavailable_source_media"]
@@ -207,7 +245,10 @@ def _parse_page(
 
     posts: list[dict] = []
     for el in soup.select(".tgme_widget_message"):
-        post = _parse_message(el, max_media_per_post=max_media_per_post)
+        post = _parse_message(
+            el, max_media_per_post=max_media_per_post,
+            base_url="https://eitaa.com" if platform == "eitaa" else "https://t.me",
+        )
         if post:
             posts.append(post)
     return title, posts
@@ -259,10 +300,14 @@ def _download_bytes(
                 match = re.fullmatch(r"bytes 0-(\d+)/(\d+)", response.headers.get("content-range", ""))
                 if not match or int(match.group(1)) + 1 != int(match.group(2)) or len(response.content) != int(match.group(2)):
                     raise ValueError("media download returned incomplete content")
-            suffix = Path(urlparse(url).path).suffix.lower()
-            allowed = {".mp4", ".m4v", ".mov", ".webm", ".mkv"} if media_type == "video" else {".jpg", ".jpeg", ".png", ".webp", ".gif"}
-            if suffix not in allowed:
-                suffix = ".mp4" if media_type == "video" else ".jpg"
+            suffix = Path(unquote(urlparse(url).path)).suffix.lower()
+            if media_type in {"image", "video"}:
+                allowed = {".mp4", ".m4v", ".mov", ".webm", ".mkv"} if media_type == "video" else {".jpg", ".jpeg", ".png", ".webp", ".gif"}
+                if suffix not in allowed:
+                    suffix = ".mp4" if media_type == "video" else ".jpg"
+            elif not re.fullmatch(r"\.[a-z0-9]{1,10}", suffix):
+                content_type = response.headers.get("content-type", "").split(";", 1)[0].strip()
+                suffix = mimetypes.guess_extension(content_type) or ".bin"
             return response.content, suffix
         except (httpx.HTTPError, ValueError) as exc:
             logger.warning("media download attempt %s/3 failed: %s", attempt, exc)
@@ -391,6 +436,7 @@ def _save_post(
                 "position": i,
                 "url": media["url"],
                 "media_type": media_type,
+                "filename": media.get("filename"),
             }
             if download_photos:
                 try:
@@ -398,7 +444,7 @@ def _save_post(
                 except (RuntimeError, ValueError) as exc:
                     logger.error("media for telegram #%s unavailable: %s", post["id"], exc)
                 else:
-                    prefix = "video" if media_type == "video" else "photo"
+                    prefix = {"video": "video", "image": "photo", "audio": "audio"}.get(media_type, "file")
                     name = f"{prefix}_{i}{suffix}" if len(media_items) > 1 else f"{prefix}{suffix}"
                     file_path = post_media / name
                     file_path.write_bytes(content)

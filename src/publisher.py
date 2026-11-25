@@ -45,6 +45,10 @@ def _media_payloads(
             name = f"media_{row['position']}{suffix}"
         else:
             name = Path(row["file_path"] or f"photo_{row['position']}.jpg").name
+        if row["filename"]:
+            filename = str(row["filename"]).replace("\\", "/").rsplit("/", 1)[-1].strip()
+            if filename not in {"", ".", ".."}:
+                name = filename
         media.append((bytes(content), name, str(row["media_type"] or "image")))
     return media
 
