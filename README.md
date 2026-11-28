@@ -51,6 +51,8 @@ Set top-level `exclude_post_terms` to filter words across all channels, for exam
 
 Selected media is required for publication: failed or missing downloads are retried when publishing, using the scraper's Telegram proxy settings, and uploads are attempted up to three times. If media is still unavailable, the post remains failed in the queue rather than publishing its caption alone; later queue runs retry it. With `download_media: false`, media is downloaded on demand during publication instead of during scraping. Only media selected by `max_media_per_post` is sent.
 
+For multi-file posts, the first file carries the caption and continuation text is sent only after every selected file is sent. If a later send fails, previously sent files cannot be rolled back and may be sent again when the queue retries. Empty text messages are not sent.
+
 Older queued posts whose media download failed before this behavior was added may have no saved media metadata; their missing media cannot be detected or recovered from the database alone.
 
 For Telegram replies, the bridge publishes the reply's own text or caption, not the potentially truncated preview of the message being replied to.

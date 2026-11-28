@@ -66,10 +66,10 @@ class WeMessengerClient:
         body = (text or "").strip()
         chunks: list[str] = []
         while len(body) > TEXT_LIMIT:
-            split_at = body.rfind("\n", 0, TEXT_LIMIT + 1)
+            split_at = body.rfind("\n", 0, TEXT_LIMIT)
             if split_at <= 0:
-                split_at = body.rfind(" ", 0, TEXT_LIMIT + 1)
-            if split_at <= 0:
+                split_at = body.rfind(" ", 0, TEXT_LIMIT)
+            if split_at <= 0 or not body[:split_at].strip():
                 split_at = TEXT_LIMIT
             else:
                 split_at += 1
@@ -77,6 +77,8 @@ class WeMessengerClient:
             body = body[split_at:]
         if body:
             chunks.append(body)
+        if any(not chunk.strip() for chunk in chunks):
+            raise ValueError("text contains a whitespace-only message chunk")
         return chunks
 
     def _send(self, client: httpx.Client, payload: dict[str, Any]) -> dict[str, Any]:
@@ -95,6 +97,8 @@ class WeMessengerClient:
         return data if isinstance(data, dict) else {"raw": data}
 
     def _send_text_chunk(self, client: httpx.Client, body: str) -> dict[str, Any]:
+        if not body.strip():
+            raise ValueError("text is empty")
         logger.info("WeMessenger send text (%d chars)", len(body))
         return self._send(
             client,
@@ -220,6 +224,8 @@ class WeMessengerClient:
     ) -> dict[str, Any]:
         if media_type not in SUPPORTED_MEDIA_TYPES:
             raise ValueError(f"Unsupported WeMessenger media type: {media_type}")
+        if not content:
+            raise ValueError(f"Empty media file: {filename}")
         uploaded = self._upload_media(client, content, filename, media_type)
         return self._send_uploaded_media(
             client, uploaded=uploaded, filename=filename, media_type=media_type, caption=caption
@@ -301,13 +307,16 @@ class WeMessengerClient:
         if media is None:
             media = [(content, filename, "image") for content, filename in photos or []]
 
+        text_chunks = self._split_text(caption or "")
+        if not media and not text_chunks:
+            raise ValueError("post has neither text nor media")
+
         with httpx.Client(
             follow_redirects=True,
             timeout=60.0,
             trust_env=False,
             proxy=self.proxy,
         ) as client:
-            text_chunks = self._split_text(caption or "")
             if media:
                 uploads = []
                 for content, filename, media_type in media:
@@ -323,17 +332,15 @@ class WeMessengerClient:
                     client, uploaded=first_upload, filename=first_name, media_type=first_type,
                     caption=text_chunks[0] if text_chunks else None,
                 )
-                for chunk in text_chunks[1:]:
-                    self._send_text_chunk(client, chunk)
                 for uploaded, filename, media_type in uploads[1:]:
                     self._send_uploaded_media(
                         client, uploaded=uploaded, filename=filename, media_type=media_type,
                         caption=None,
                     )
+                for chunk in text_chunks[1:]:
+                    self._send_text_chunk(client, chunk)
                 return
 
             if text_chunks:
                 self.send_text(client, caption or "")
                 return
-
-            raise ValueError("post has neither text nor media")
